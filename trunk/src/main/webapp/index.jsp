@@ -12,7 +12,7 @@
 var server='<%= java.net.InetAddress.getLocalHost().getHostName() %>';
 
 function show(id) {
-	var href = "/docusearch/svc/search/myindex/" + id;
+	var href = "/docusearch/svc/search/efile_providers/" + id;
     jQuery.ajax({
           type: "GET",
           url: href,
@@ -20,16 +20,15 @@ function show(id) {
           success: function(details){
 			     var textToInsert = '';
 			     textToInsert += '<li>' + details._id + '</li>';
-			     textToInsert += '<li>' + details.name + '</li>';
-			     textToInsert += '<li>' + details.description + '</li>';
-			     textToInsert += '<li><a href="http://' + details.url + '">' + details.url + '</a></li>';
-			     textToInsert += '<li>' + details.address + '</li>';
+			     textToInsert += '<li>' + details.business_name + '</li>';
+			     textToInsert += '<li>' + details.street_address_1 + '</li>';
 			     textToInsert += '<li>' + details.city + '</li>';
-			     textToInsert += '<li>' + details.province + '</li>';
-			     textToInsert += '<li>' + details.postal_code + '</li>';
-			     textToInsert += '<li>' + details.latitude + '</li>';
-			     textToInsert += '<li>' + details.longitude + '</li>';
-			     textToInsert += '<li><a href="http://' + server + ':5984/myindex/' + details._id + '">CouchDB</a></li>';
+			     textToInsert += '<li>' + details.state + '</li>';
+			     textToInsert += '<li>' + details.zip + '</li>';
+			     textToInsert += '<li>' + details.contact_first_name + '</li>';
+			     textToInsert += '<li>' + details.contact_last_name + '</li>';
+			     textToInsert += '<li>' + details.phone + '</li>';
+			     textToInsert += '<li><a href="http://' + server + ':5984/efile_providers/' + details._id + '">CouchDB</a></li>';
                  var list = $('<ul/>');
                  list.append(textToInsert);  
      	         $('#details').empty();
@@ -43,11 +42,10 @@ function show(id) {
 
 $(document).ready(function(){
    $(".button").click(function() {search()});
-   //$(".kw").change(function() {search()});
 }); 
 function search(){
 	  var kw = $("input#keywords").val();
-	  var href = "/docusearch/svc/search/myindex?keywords=" + kw;
+	  var href = "/docusearch/svc/search/efile_providers?keywords=" + kw;
 
       jQuery.ajax({
           type: "GET",
@@ -83,7 +81,7 @@ function search(){
 <input type="text" id="keywords" class="kw" name="keywords">
 <label for="index">Index: </label>
 <select name="index">
-      <option selected value="myindex">Index</option>
+      <option selected value="efile_providers">Index</option>
 </select>
 <input type="button" id="search" name="search" class="button" value="Search">
 </fieldset>  

@@ -219,7 +219,8 @@
            <findbugsXmlWithMessages>true</findbugsXmlWithMessages>
            <xmlOutput>true</xmlOutput>
          </configuration>
-      </plugin>
+     </plugin>
+     <!--
 	  <plugin>
          <groupId>org.apache.maven.plugins</groupId>
          <artifactId>maven-checkstyle-plugin</artifactId>
@@ -229,25 +230,10 @@
            <enableRulesSummary>false</enableRulesSummary>
            <headerFile>${basedir}/src/main/resources/HEADER.txt</headerFile>
          </configuration>
-      </plugin>
+     </plugin>
+     -->
     </plugins>
   </reporting>
-  <reports>
-    <report>maven-jdepend-plugin</report>
-    <report>maven-checkstyle-plugin</report>
-    <report>maven-changes-plugin</report>
-    <report>maven-changelog-plugin</report>
-    <report>maven-developer-activity-plugin</report>
-    <report>maven-file-activity-plugin</report>
-    <report>maven-javadoc-plugin</report>
-    <report>maven-jxr-plugin</report>
-    <report>maven-junit-report-plugin</report>
-    <report>maven-license-plugin</report>
-    <report>maven-tasklist-plugin</report>
-    <report>maven-pmd-plugin</report>
-    <report>maven-simian-plugin</report>
-    <report>maven-findbugs-plugin</report>
-  </reports>
   <repositories>
     <repository>
       <id>oracleReleases</id>
