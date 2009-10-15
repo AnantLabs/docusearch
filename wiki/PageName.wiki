@@ -1,7 +1,7 @@
 #labels couchdb,berkley,db,lucene,bdb,index,search,query,etl
-#DocuSearch
+= DocuSearch =
 
-= Getting Started  =
+== Getting Started  ==
 
 To get started download the source using:
 {{{
