@@ -47,9 +47,13 @@ public class DocumentsDatabaseIndexerTest {
 
 	@Test
 	public final void testIndexAllDatabases() {
-
 		EasyMock.expect(repository.getAllDatabases()).andReturn(
 				new String[] { DB_NAME });
+		EasyMock.expect(configRepository.getIndexPolicy(DB_NAME)).andReturn(
+				new IndexPolicy());
+		EasyMock.expect(repository.getAllDocuments(DB_NAME, null, null))
+		.andReturn(new ArrayList<Document>());
+		
 
 		EasyMock.replay(repository);
 		EasyMock.replay(configRepository);
@@ -62,7 +66,12 @@ public class DocumentsDatabaseIndexerTest {
 
 	@Test
 	public final void testIndexDatabases() {
-
+		
+		EasyMock.expect(configRepository.getIndexPolicy(DB_NAME)).andReturn(
+				new IndexPolicy());
+		EasyMock.expect(repository.getAllDocuments(DB_NAME, null, null))
+		.andReturn(new ArrayList<Document>());
+		
 		EasyMock.replay(repository);
 		EasyMock.replay(configRepository);
 

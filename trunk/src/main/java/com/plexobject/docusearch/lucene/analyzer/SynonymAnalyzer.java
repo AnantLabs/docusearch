@@ -23,12 +23,9 @@ public class SynonymAnalyzer extends Analyzer {
 	}
 
 	public TokenStream tokenStream(String fieldName, Reader reader) {
-		//TokenStream result = new SynonymFilter(new StopFilter(true,
-		//		new LowerCaseFilter(new StandardFilter(new StandardTokenizer(
-		//				reader))), StandardAnalyzer.STOP_WORDS_SET), synonymMap);
-		TokenStream result = new StopFilter(true,
+		TokenStream result = new SynonymFilter(new StopFilter(true,
 				new LowerCaseFilter(new StandardFilter(new StandardTokenizer(
-						reader))), StandardAnalyzer.STOP_WORDS_SET);
+						reader))), StandardAnalyzer.STOP_WORDS_SET), synonymMap);
 		return result;
 	}
 }
