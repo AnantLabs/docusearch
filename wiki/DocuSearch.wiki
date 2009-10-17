@@ -82,6 +82,6 @@ Next you can search contents of the index via:
  curl "http://localhost:9090/docusearch/svc/search/efile_providers?keywords=mike"
 }}} 
 
-== Conclusion ==
+== Summary ==
 
 DocuSearch makes it easy to query documents on CouchDB, however I have also started adding support for Berkley DB if you choose to use it. I found CouchDB wastes a lot of space and is a bit slow so that may be alternative option for some. I also plan to add ngrams and stem based analyzers to create better search experience. I also welcome you to join the project. You can add yourself to http://code.google.com/p/docusearch/ project and start contributing.
