@@ -25,8 +25,6 @@ import com.plexobject.docusearch.persistence.RepositoryFactory;
 public class DocumentsDatabaseIndexerTest {
 	private static Logger LOGGER = Logger.getRootLogger();
 	private static final String DB_NAME = "MYDB";
-	private static final int MAX_LIMIT = 2048;
-
 	private DocumentRepository repository;
 	private ConfigurationRepository configRepository;
 	private DocumentsDatabaseIndexer indexer;
@@ -49,11 +47,9 @@ public class DocumentsDatabaseIndexerTest {
 
 	@Test
 	public final void testIndexAllDatabases() {
-		EasyMock.expect(configRepository.getIndexPolicy(DB_NAME)).andReturn(
-				new IndexPolicy());
+
 		EasyMock.expect(repository.getAllDatabases()).andReturn(
 				new String[] { DB_NAME });
-		EasyMock.expect(repository.getAllDocuments(DB_NAME, 0, MAX_LIMIT)).andReturn(new ArrayList<Document>());
 
 		EasyMock.replay(repository);
 		EasyMock.replay(configRepository);
@@ -61,26 +57,26 @@ public class DocumentsDatabaseIndexerTest {
 		indexer.indexAllDatabases();
 		EasyMock.verify(repository);
 		EasyMock.verify(configRepository);
+
 	}
 
 	@Test
 	public final void testIndexDatabases() {
-		EasyMock.expect(configRepository.getIndexPolicy(DB_NAME)).andReturn(
-				new IndexPolicy());
-		EasyMock.expect(repository.getAllDocuments(DB_NAME, 0, MAX_LIMIT)).andReturn(new ArrayList<Document>());
+
 		EasyMock.replay(repository);
 		EasyMock.replay(configRepository);
 
 		indexer.indexDatabases(new String[] { DB_NAME });
 		EasyMock.verify(repository);
 		EasyMock.verify(configRepository);
+
 	}
 
 	@Test
 	public final void testIndexDatabase() {
 		EasyMock.expect(configRepository.getIndexPolicy(DB_NAME)).andReturn(
 				new IndexPolicy());
-		EasyMock.expect(repository.getAllDocuments(DB_NAME, 0, MAX_LIMIT))
+		EasyMock.expect(repository.getAllDocuments(DB_NAME, null, null))
 				.andReturn(new ArrayList<Document>());
 
 		EasyMock.replay(repository);
@@ -99,7 +95,8 @@ public class DocumentsDatabaseIndexerTest {
 		EasyMock.replay(repository);
 		EasyMock.replay(configRepository);
 
-		final Collection<Document> docs = Arrays.asList(new DocumentBuilder(DB_NAME).setId("ID").build());
+		final Collection<Document> docs = Arrays.asList(new DocumentBuilder(
+				DB_NAME).setId("ID").build());
 		indexer.indexDocuments(DB_NAME, docs);
 		EasyMock.verify(repository);
 		EasyMock.verify(configRepository);

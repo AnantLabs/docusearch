@@ -48,10 +48,10 @@ import com.plexobject.docusearch.query.SearchDocList;
 public class QueryImpl implements Query {
 
 	private static final Logger LOGGER = Logger.getLogger(QueryImpl.class);
+	private static final int MAX_LIMIT = Configuration.getInstance()
+			.getPageSize();
 	private static final int MAX_MAX_DAYS = Configuration.getInstance()
 			.getInteger("lucene.recency.max.days", 2 * 365);
-	private static final int MAX_LIMIT = Configuration.getInstance()
-			.getInteger("lucene.max.paging.size", 2048);
 	private static final int DEFAULT_LIMIT = Configuration.getInstance()
 			.getInteger("lucene.default.paging.size", 20);
 	private static final double DEFAULT_MULTIPLIER = Configuration
@@ -229,10 +229,10 @@ public class QueryImpl implements Query {
 				occurs[i] = BooleanClause.Occur.SHOULD;
 			}
 			return MultiFieldQueryParser.parse(criteria.getKeywords(), fields,
-					occurs, LuceneUtils.ANALYZER);
+					occurs, LuceneUtils.getDefaultAnalyzer());
 		} else {
-			QueryParser parser = new QueryParser("content",
-					LuceneUtils.ANALYZER);
+			QueryParser parser = new QueryParser("content", LuceneUtils
+					.getDefaultAnalyzer());
 			return parser.parse(criteria.getKeywords());
 		}
 	}

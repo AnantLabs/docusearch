@@ -1,5 +1,4 @@
 package com.plexobject.docusearch.service.impl;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -11,7 +10,6 @@ import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
-
 import org.easymock.EasyMock;
 import org.junit.After;
 import org.junit.Assert;
@@ -26,12 +24,11 @@ import com.plexobject.docusearch.persistence.ConfigurationRepository;
 import com.plexobject.docusearch.persistence.DocumentRepository;
 import com.plexobject.docusearch.persistence.RepositoryFactory;
 import com.plexobject.docusearch.service.IndexService;
-import com.plexobject.docusearch.service.impl.IndexServiceImpl;
 
 public class IndexServiceImplTest {
-	private static final String PEOPLE = "people";
+	private static final String COMPANIES = "companies";
 	private static final String DB_NAME = "MYDB";
-	private static final int MAX_LIMIT = 2048;
+
 	private static Logger LOGGER = Logger.getRootLogger();
 
 	private DocumentRepository repository;
@@ -60,42 +57,42 @@ public class IndexServiceImplTest {
 
 	@Test
 	public final void testCreate() {
-		EasyMock.expect(repository.getAllDocuments(PEOPLE, 0, MAX_LIMIT))
+		EasyMock.expect(repository.getAllDocuments(COMPANIES, null, null))
 				.andReturn(newDocuments());
 
-		EasyMock.expect(configRepository.getIndexPolicy(PEOPLE)).andReturn(
+		EasyMock.expect(configRepository.getIndexPolicy(COMPANIES)).andReturn(
 				newIndexPolicy());
 
 		EasyMock.replay(repository);
 		EasyMock.replay(configRepository);
 
-		Response response = service.create(PEOPLE);
+		Response response = service.create(COMPANIES);
 		EasyMock.verify(repository);
 		EasyMock.verify(configRepository);
 		Assert.assertEquals(200, response.getStatus());
 		Assert.assertTrue("unexpected response "
 				+ response.getEntity().toString(), response.getEntity()
-				.toString().contains("rebuilt index for " + PEOPLE));
+				.toString().contains("rebuilt index for " + COMPANIES));
 	}
 
 	@Test
 	public final void testUpdate() {
-		EasyMock.expect(repository.getDocument(PEOPLE, "id")).andReturn(
+		EasyMock.expect(repository.getDocument(COMPANIES, "id")).andReturn(
 				newDocument(true));
-		EasyMock.expect(configRepository.getIndexPolicy(PEOPLE)).andReturn(
+		EasyMock.expect(configRepository.getIndexPolicy(COMPANIES)).andReturn(
 				newIndexPolicy());
 
 		EasyMock.replay(repository);
 		EasyMock.replay(configRepository);
 
-		Response response = service.update(PEOPLE, "id");
+		Response response = service.update(COMPANIES, "id");
 		EasyMock.verify(repository);
 		EasyMock.verify(configRepository);
 		Assert.assertEquals(200, response.getStatus());
 		Assert.assertTrue("unexpected response "
 				+ response.getEntity().toString(), response.getEntity()
 				.toString().contains(
-						"updated 1 documents in index for " + PEOPLE
+						"updated 1 documents in index for " + COMPANIES
 								+ " with ids id"));
 	}
 
@@ -127,3 +124,4 @@ public class IndexServiceImplTest {
 		return policy;
 	}
 }
+

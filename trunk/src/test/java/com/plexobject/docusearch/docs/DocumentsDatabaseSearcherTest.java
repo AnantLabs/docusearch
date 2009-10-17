@@ -15,11 +15,13 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.plexobject.docusearch.Configuration;
 import com.plexobject.docusearch.docs.DocumentsDatabaseSearcher;
 import com.plexobject.docusearch.domain.Document;
 import com.plexobject.docusearch.domain.DocumentBuilder;
 import com.plexobject.docusearch.index.IndexPolicy;
 import com.plexobject.docusearch.index.lucene.IndexerImpl;
+import com.plexobject.docusearch.lucene.LuceneUtils;
 import com.plexobject.docusearch.persistence.ConfigurationRepository;
 import com.plexobject.docusearch.persistence.DocumentRepository;
 import com.plexobject.docusearch.persistence.RepositoryFactory;
@@ -27,9 +29,8 @@ import com.plexobject.docusearch.query.QueryPolicy;
 
 public class DocumentsDatabaseSearcherTest {
 	private static Logger LOGGER = Logger.getRootLogger();
-	private static final int MAX_LIMIT = 2048;
+	private static final int MAX_LIMIT = Configuration.getInstance().getPageSize();
 	private static final String DB_NAME = "MYDB";
-    private static final File INDEX_DIR = new File(System.getProperty("user.home"), System.getProperty("lucene.dir", "lucene"));
 
 	private DocumentRepository repository;
 	private ConfigurationRepository configRepository;
@@ -54,8 +55,8 @@ public class DocumentsDatabaseSearcherTest {
 
 	@Test
 	public final void testQuery() {
-		EasyMock.expect(configRepository.getQueryPolicy(DB_NAME))
-					.andReturn(new QueryPolicy());
+		EasyMock.expect(configRepository.getQueryPolicy(DB_NAME)).andReturn(
+				new QueryPolicy());
 
 		EasyMock.replay(repository);
 		EasyMock.replay(configRepository);
@@ -70,7 +71,7 @@ public class DocumentsDatabaseSearcherTest {
 		EasyMock.replay(repository);
 		EasyMock.replay(configRepository);
 		searcher.query(DB_NAME, "keywords", 0, MAX_LIMIT, Arrays.asList("name",
-					"symbol"));
+				"symbol"));
 		EasyMock.verify(repository);
 		EasyMock.verify(configRepository);
 	}
@@ -92,8 +93,8 @@ public class DocumentsDatabaseSearcherTest {
 			attrs.put(fields[i], fields[i + 1]);
 		}
 
-		final Document doc = new DocumentBuilder(DB_NAME).putAll(attrs).setId(id)
-				.setRevision("REV").build();
+		final Document doc = new DocumentBuilder(DB_NAME).putAll(attrs).setId(
+				id).setRevision("REV").build();
 		final IndexPolicy policy = new IndexPolicy();
 		if (indexFields == null) {
 			for (int i = 0; i < fields.length - 1; i += 2) {
@@ -105,7 +106,8 @@ public class DocumentsDatabaseSearcherTest {
 			}
 		}
 		policy.setScore(score);
-		final IndexerImpl indexer = new IndexerImpl(new File(INDEX_DIR, DB_NAME));
+		final IndexerImpl indexer = new IndexerImpl(new File(
+				LuceneUtils.INDEX_DIR, DB_NAME));
 		return indexer.index(policy, Arrays.asList(doc));
 	}
 }

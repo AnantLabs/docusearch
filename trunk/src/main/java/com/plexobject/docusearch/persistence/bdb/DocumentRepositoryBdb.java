@@ -13,6 +13,7 @@ import java.util.Map;
 import org.apache.commons.validator.GenericValidator;
 import org.apache.log4j.Logger;
 
+import com.plexobject.docusearch.Configuration;
 import com.plexobject.docusearch.domain.Document;
 import com.plexobject.docusearch.persistence.DocumentRepository;
 import com.plexobject.docusearch.persistence.PersistenceException;
@@ -36,7 +37,7 @@ import com.sleepycat.je.OperationStatus;
  * 
  */
 public class DocumentRepositoryBdb implements DocumentRepository {
-	private static final int MAX_MAX_LIMIT = 2048;
+	private static final int MAX_MAX_LIMIT = 1024;
 
 	private static final Logger LOGGER = Logger
 			.getLogger(DocumentRepositoryBdb.class);
@@ -56,7 +57,7 @@ public class DocumentRepositoryBdb implements DocumentRepository {
 	 * (non-Javadoc)
 	 * 
 	 * @see
-	 * com.plexobject.search.persistence.DocumentRepository#createDatabase
+	 * om.plexobject.docusearch.persistence.DocumentRepository#createDatabase
 	 * (java.lang.String)
 	 */
 	@Override
@@ -71,7 +72,7 @@ public class DocumentRepositoryBdb implements DocumentRepository {
 	 * (non-Javadoc)
 	 * 
 	 * @see
-	 * com.plexobject.search.persistence.DocumentRepository#deleteDatabase
+	 * om.plexobject.docusearch.persistence.DocumentRepository#deleteDatabase
 	 * (java.lang.String)
 	 */
 	@Override
@@ -99,12 +100,15 @@ public class DocumentRepositoryBdb implements DocumentRepository {
 	 * (non-Javadoc)
 	 * 
 	 * @see
-	 * com.plexobject.search.persistence.DocumentRepository#getAllDatabases()
+	 * om.plexobject.docusearch.persistence.DocumentRepository#getAllDatabases()
 	 */
 	@Override
 	public String[] getAllDatabases() throws PersistenceException {
 		try {
-			List<String> dbList = env.getDatabaseNames();
+			List<String> dbList = null;
+			synchronized (env) {
+				dbList = env.getDatabaseNames();
+			}
 			String[] dbNames = new String[dbList.size()];
 			for (int i = 0; i < dbList.size(); i++) {
 				dbNames[i] = dbList.get(i);
@@ -121,7 +125,7 @@ public class DocumentRepositoryBdb implements DocumentRepository {
 	 * (non-Javadoc)
 	 * 
 	 * @see
-	 * com.plexobject.search.persistence.DocumentRepository#getAllDocuments
+	 * om.plexobject.docusearch.persistence.DocumentRepository#getAllDocuments
 	 * (java.lang.String, long, int)
 	 */
 	@Override
@@ -147,7 +151,7 @@ public class DocumentRepositoryBdb implements DocumentRepository {
 	 * (non-Javadoc)
 	 * 
 	 * @see
-	 * com.plexobject.search.persistence.DocumentRepository#getAllDocuments
+	 * om.plexobject.docusearch.persistence.DocumentRepository#getAllDocuments
 	 * (java.lang.String, java.lang.String, java.lang.String)
 	 */
 	@Override
@@ -204,7 +208,7 @@ public class DocumentRepositoryBdb implements DocumentRepository {
 	 * (non-Javadoc)
 	 * 
 	 * @see
-	 * com.plexobject.search.persistence.DocumentRepository#getDocument(java
+	 * om.plexobject.docusearch.persistence.DocumentRepository#getDocument(java
 	 * .lang.String, java.lang.String)
 	 */
 	@Override
@@ -242,7 +246,7 @@ public class DocumentRepositoryBdb implements DocumentRepository {
 	 * (non-Javadoc)
 	 * 
 	 * @see
-	 * com.plexobject.search.persistence.DocumentRepository#getDocuments(java
+	 * om.plexobject.docusearch.persistence.DocumentRepository#getDocuments(java
 	 * .lang.String, java.lang.String[])
 	 */
 	@Override
@@ -255,7 +259,7 @@ public class DocumentRepositoryBdb implements DocumentRepository {
 	 * (non-Javadoc)
 	 * 
 	 * @see
-	 * com.plexobject.search.persistence.DocumentRepository#getDocuments(java
+	 * om.plexobject.docusearch.persistence.DocumentRepository#getDocuments(java
 	 * .lang.String, java.util.Collection)
 	 */
 	@Override
@@ -269,7 +273,7 @@ public class DocumentRepositoryBdb implements DocumentRepository {
 	 * (non-Javadoc)
 	 * 
 	 * @see
-	 * com.plexobject.search.persistence.DocumentRepository#getInfo(java.lang
+	 * om.plexobject.docusearch.persistence.DocumentRepository#getInfo(java.lang
 	 * .String)
 	 */
 	@Override
@@ -282,8 +286,8 @@ public class DocumentRepositoryBdb implements DocumentRepository {
 	 * (non-Javadoc)
 	 * 
 	 * @see
-	 * com.plexobject.search.persistence.DocumentRepository#saveDocument(com
-	 * .plexobject.search.domain.Document)
+	 * om.plexobject.docusearch.persistence.DocumentRepository#saveDocument(com
+	 * .plexobject.docusearch.domain.Document)
 	 */
 	@Override
 	public Document saveDocument(Document document) throws PersistenceException {

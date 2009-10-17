@@ -11,6 +11,7 @@ import org.apache.log4j.PatternLayout;
 
 import org.apache.lucene.store.Directory;
 
+import com.plexobject.docusearch.Configuration;
 import com.plexobject.docusearch.domain.Document;
 import com.plexobject.docusearch.lucene.LuceneUtils;
 import com.plexobject.docusearch.persistence.ConfigurationRepository;
@@ -27,7 +28,7 @@ public class DocumentsDatabaseSearcher {
 
 	private static final Logger LOGGER = Logger
 			.getLogger(DocumentsDatabaseSearcher.class);
-	private static final int MAX_LIMIT = 2048;
+	private static final int MAX_LIMIT = Configuration.getInstance().getPageSize();
 
 	private final DocumentRepository repository;
 	private final ConfigurationRepository configRepository;

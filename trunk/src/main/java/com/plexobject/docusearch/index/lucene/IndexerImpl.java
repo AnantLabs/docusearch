@@ -31,7 +31,9 @@ import com.plexobject.docusearch.lucene.LuceneUtils;
  */
 public class IndexerImpl implements Indexer {
 	private static final Logger LOGGER = Logger.getLogger(IndexerImpl.class);
+	private static final boolean OPTIMIZE = false;
 	Pattern JSON_PATTERN = Pattern.compile("[,;:\\[\\]{}()\\s]+");
+	private int numIndexed;
 	//
 	private final Directory dir;
 
@@ -62,7 +64,9 @@ public class IndexerImpl implements Indexer {
 		} finally {
 			if (writer != null) {
 				try {
-					writer.optimize();
+					if (OPTIMIZE) {
+						writer.optimize();
+					}
 				} catch (Exception e) {
 					LOGGER.error(e);
 				} finally {
@@ -150,8 +154,9 @@ public class IndexerImpl implements Indexer {
 		writer.addDocument(ldoc);
 
 		// writer.updateDocument(new Term(Document.ID, doc));
-		if (LOGGER.isTraceEnabled()) {
-			LOGGER.trace("Adding " + ldoc);
+		if (++numIndexed % 1000 == 0 && LOGGER.isInfoEnabled()) {
+			LOGGER.info(numIndexed + ": Indexing " + ldoc + " for input " + doc
+					+ " with policy " + policy);
 		}
 	}
 
@@ -205,9 +210,8 @@ public class IndexerImpl implements Indexer {
 				final JSONObject jsonObject = new JSONObject(value);
 				value = jsonObject.optString(subscript);
 			} else {
-				throw new IllegalStateException(
-						"Failed to get array value for " + tagName + " in "
-								+ value + " from json " + json);
+				LOGGER.warn("Failed to get array value for " + tagName + " in "
+						+ value + " from json " + json);
 			}
 		} else {
 			final JSONArray jsonArray = new JSONArray(value);

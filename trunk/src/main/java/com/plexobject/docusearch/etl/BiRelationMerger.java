@@ -40,7 +40,7 @@ public class BiRelationMerger extends BaseRelationMerger {
 
 	public BiRelationMerger(final DocumentRepository repository,
 			final Properties props) {
-		super(props);
+		super(repository, props);
 	}
 
 	@Override
