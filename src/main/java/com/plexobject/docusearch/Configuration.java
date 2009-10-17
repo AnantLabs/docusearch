@@ -13,6 +13,8 @@ import org.apache.log4j.Logger;
 public class Configuration {
 	private static final String RESOURCE_NAME = "/application.properites";
 	private static final String CONFIG_DATABASE_KEY = "config.db.name";
+	private static final String PAGE_SIZE = "page.size";
+	private static final int MAX_PAGE_SIZE = 256;
 	private static final String DEFAULT_CONFIG_DATABASE = "the_config";
 	private static final Logger LOGGER = Logger.getLogger(Configuration.class);
 	private static Configuration instance = new Configuration();
@@ -39,6 +41,9 @@ public class Configuration {
 
 	public String getConfigDatabase() {
 		return getProperty(CONFIG_DATABASE_KEY, DEFAULT_CONFIG_DATABASE);
+	}
+	public int getPageSize() {
+		return getInteger(PAGE_SIZE, MAX_PAGE_SIZE);
 	}
 
 	public String getProperty(final String key) {

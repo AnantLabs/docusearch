@@ -86,7 +86,7 @@ public class TriRelationMerger extends BaseRelationMerger {
 	private static void usage() {
 		System.err.println("Usage: <config-file-name>");
 		System.err
-				.println("   e.g. mvn exec:java -Dexec.mainClass=\"com.plexobject.docusearch.etl.TriRelationMerger\" -Dexec.args=\"merge.properties\"");
+				.println("   e.g. mvn exec:java -Dexec.mainClass=\"om.plexobject.docusearch.etl.TriRelationMerger\" -Dexec.args=\"data/merge_company_tags.properties\"");
 		System.exit(1);
 	}
 

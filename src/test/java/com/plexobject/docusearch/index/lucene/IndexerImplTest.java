@@ -2,12 +2,12 @@
  * 
  */
 package com.plexobject.docusearch.index.lucene;
-
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.RAMDirectory;
 import org.junit.After;
@@ -19,16 +19,18 @@ import com.plexobject.docusearch.domain.Document;
 import com.plexobject.docusearch.domain.DocumentBuilder;
 import com.plexobject.docusearch.index.IndexPolicy;
 import com.plexobject.docusearch.index.lucene.IndexerImpl;
+import com.plexobject.docusearch.lucene.LuceneUtils;
+import com.plexobject.docusearch.lucene.analyzer.DiacriticAnalyzer;
+import com.plexobject.docusearch.lucene.analyzer.MetaphoneReplacementAnalyzer;
+import com.plexobject.docusearch.lucene.analyzer.PorterAnalyzer;
+import com.plexobject.docusearch.lucene.analyzer.SynonymAnalyzer;
 import com.plexobject.docusearch.query.QueryCriteria;
 import com.plexobject.docusearch.query.SearchDoc;
 import com.plexobject.docusearch.query.lucene.QueryImpl;
 
 import org.apache.log4j.BasicConfigurator;
+import org.apache.solr.analysis.SynonymMap;
 
-/**
- * @author bhatti@plexobject.com
- * 
- */
 public class IndexerImplTest {
 	private static final String DB_NAME = "MYDB";
 	private Directory ram;
@@ -40,6 +42,7 @@ public class IndexerImplTest {
 	public void setUp() throws Exception {
 		BasicConfigurator.configure();
 		ram = new RAMDirectory();
+
 	}
 
 	/**
@@ -51,13 +54,24 @@ public class IndexerImplTest {
 
 	@Test
 	public void testIndexWithScoreQuery() throws Exception {
+		Analyzer saved = LuceneUtils.getDefaultAnalyzer();
+		query(new MetaphoneReplacementAnalyzer());
+		query(new SynonymAnalyzer(new SynonymMap()));
+		query(new PorterAnalyzer());
+		query(new DiacriticAnalyzer());
+		LuceneUtils.setDefaultAnalyzer(saved);
+
+	}
+
+	private void query(final Analyzer analyzer) throws Exception {
+		LuceneUtils.setDefaultAnalyzer(analyzer);
 		int succeeded = index();
 		final QueryCriteria criteria = new QueryCriteria();
 		criteria.setScoreQuery();
 		final QueryImpl query = new QueryImpl(ram);
 
 		List<SearchDoc> results = query.search(criteria, 1, 10);
-
+		System.out.println("Analyzer " + analyzer + ", results " + results);
 		Assert.assertEquals(2, succeeded);
 		Assert.assertEquals(2, results.size());
 		Assert.assertEquals(1, results.get(0).getHitDocumentNumber());
@@ -81,15 +95,15 @@ public class IndexerImplTest {
 
 	@Test
 	public void testIndexWithMultwordKewords() throws Exception {
-		int succeeded = index("1", 7, new String[] { "name", "this hat is green", "title",
-				"luke for lucene", "tags",
+		int succeeded = index("1", 7, new String[] { "name",
+				"this hat is green", "title", "luke for lucene", "tags",
 				"[{name:tag1, rank:1}, {name:tag2, rank:2}]", "date",
 				"{'month':'10', 'day':'9', 'year':'2009'}" }, new String[] {
 				"name", "title", "tags[name]", "date{year}" });
 		Assert.assertEquals(1, succeeded);
 
-		succeeded = index("2", 42, new String[] { "name", "this hat is blue", "title",
-				"indxing search", "tags",
+		succeeded = index("2", 42, new String[] { "name", "this hat is blue",
+				"title", "indxing search", "tags",
 				"[{name:tag1, rank:1}, {name:tag2, rank:2}]", "date",
 				"{'month':'10', 'day':'9', 'year':'2009'}" }, new String[] {
 				"name", "title", "tags[name]", "date{year}" });
@@ -104,9 +118,13 @@ public class IndexerImplTest {
 	}
 
 	private int index() throws Exception {
+		ram = new RAMDirectory();
+
 		int succeeded = 0;
-		succeeded = index("1", 7, new String[] { "content", "this hat is green" }, null);
-		succeeded += index("2", 42, new String[] { "content", "this hat is blue" }, null);
+		succeeded = index("1", 7,
+				new String[] { "content", "this hat is green" }, null);
+		succeeded += index("2", 42, new String[] { "content",
+				"this hat is blue" }, null);
 		return succeeded;
 	}
 
@@ -118,8 +136,8 @@ public class IndexerImplTest {
 			attrs.put(fields[i], fields[i + 1]);
 		}
 
-		final Document doc = new DocumentBuilder(DB_NAME).putAll(attrs).setId(id)
-				.setRevision("REV").build();
+		final Document doc = new DocumentBuilder(DB_NAME).putAll(attrs).setId(
+				id).setRevision("REV").build();
 		final IndexPolicy policy = new IndexPolicy();
 		if (indexFields == null) {
 			for (int i = 0; i < fields.length - 1; i += 2) {

@@ -9,6 +9,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 
+import com.plexobject.docusearch.Configuration;
 import com.plexobject.docusearch.domain.Document;
 import com.plexobject.docusearch.index.IndexPolicy;
 import com.plexobject.docusearch.index.Indexer;
@@ -21,7 +22,7 @@ import com.plexobject.docusearch.persistence.RepositoryFactory;
 public class DocumentsDatabaseIndexer {
 	private static final Logger LOGGER = Logger
 			.getLogger(DocumentsDatabaseIndexer.class);
-	private static final int MAX_LIMIT = 2048;
+	private static final int MAX_LIMIT = Configuration.getInstance().getPageSize();
 
 	private final DocumentRepository repository;
 	private final ConfigurationRepository configRepository;
@@ -42,21 +43,16 @@ public class DocumentsDatabaseIndexer {
 
 	public void indexDatabases(final String[] dbs) {
 		for (String db : dbs) {
-			indexDatabase(db);
+		 	indexDatabase(db);
 		}
 
 	}
 
 	public void indexDatabase(final String db) {
-		int startkey = 0;
+		String startkey = null;
+		String endkey = null;
 		List<Document> docs = null;
 		final File dir = new File(LuceneUtils.INDEX_DIR, db);
-		if (dir.exists()) {
-			if (!dir.renameTo(new File(LuceneUtils.INDEX_DIR, db
-					+ System.currentTimeMillis()))) {
-				LOGGER.error("Failed to rename directory " + dir);
-			}
-		}
 		if (!dir.mkdirs() && !dir.exists()) {
 			throw new RuntimeException("Failed to create directory " + dir);
 		}
@@ -65,11 +61,11 @@ public class DocumentsDatabaseIndexer {
 		int total = 0;
 		int succeeded = 0;
 		int requests = 0;
-		while ((docs = repository.getAllDocuments(db, startkey, MAX_LIMIT))
+		while ((docs = repository.getAllDocuments(db, startkey, endkey))
 				.size() > 0) {
 			requests++;
 			total += docs.size();
-			startkey += docs.size();
+			startkey = docs.get(docs.size()-1).getId();
 
 			succeeded += indexDocuments(dir, policy, docs);
 			if (total % 1000 == 0) {

@@ -59,6 +59,14 @@ public class Document implements Map<String, Object> {
 	}
 
 	/**
+	 * 
+	 * @return true if database attribute is defined
+	 */
+	public boolean hasDatabase() {
+		return !GenericValidator.isBlankOrNull(getDatabase());
+	}
+
+	/**
 	 * @return - unique uuid that identifies this document
 	 */
 	public String getId() {

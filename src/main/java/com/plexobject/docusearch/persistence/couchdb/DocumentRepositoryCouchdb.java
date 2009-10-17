@@ -38,7 +38,7 @@ import com.plexobject.docusearch.persistence.PersistenceException;
  * 
  */
 public class DocumentRepositoryCouchdb implements DocumentRepository {
-	private static final int MAX_MAX_LIMIT = 2048;
+	private static final int MAX_MAX_LIMIT = 1024;
 
 	public static final String DEFAULT_FIELD = "default";
 
@@ -279,11 +279,17 @@ public class DocumentRepositoryCouchdb implements DocumentRepository {
 		if (GenericValidator.isBlankOrNull(database)) {
 			throw new IllegalArgumentException("database not specified");
 		}
-
-		return getAllDocuments(String
-				.format(
-						"%s/_all_docs?startkey=%%22%s%%22&endkey=%%22%s%%22&include_docs=true",
-						encode(database), encode(startkey), encode(endkey)));
+		StringBuilder req = new StringBuilder();
+		req.append(encode(database));
+		req.append("/_all_docs?limit=").append(MAX_MAX_LIMIT);
+		if (!GenericValidator.isBlankOrNull(startkey)) {
+			req.append(String.format("&startkey=%%22%s%%22", encode(startkey)));
+		}
+		if (!GenericValidator.isBlankOrNull(endkey)) {
+			req.append(String.format("&endkey=%%22%s%%22", encode(endkey)));
+		}
+		req.append("&include_docs=true");
+		return getAllDocuments(req.toString());
 	}
 
 	/**
@@ -444,7 +450,7 @@ public class DocumentRepositoryCouchdb implements DocumentRepository {
 			}
 			firstCriteria = false;
 			func.append("if (doc." + e.getKey() + " == '" + e.getValue()
-					+ "') {");
+					+ "' && doc.deleted != true) {");
 		}
 		func.append("emit(null, doc);");
 		func.append("}");
@@ -484,7 +490,12 @@ public class DocumentRepositoryCouchdb implements DocumentRepository {
 			final Tuple response = httpClient.get(url);
 			final JSONObject jsonDocs = new JSONObject((String) response
 					.second());
-			return toDocuments(jsonDocs);
+			List<Document> docs = toDocuments(jsonDocs);
+
+			if (LOGGER.isInfoEnabled()) {
+				LOGGER.info("getAllDocuments(" + url + ") got " + docs.size());
+			}
+			return docs;
 		} catch (RestException e) {
 			throw new PersistenceException(
 					"Failed to get documents for " + url, e, e.getErrorCode());
@@ -521,7 +532,9 @@ public class DocumentRepositoryCouchdb implements DocumentRepository {
 						.getConverter(JSONObject.class, Document.class)
 						.convert(jsonDoc);
 				documents.add(document);
-
+			} catch (IllegalArgumentException e) {
+				LOGGER.error("Failed to parse document " + i + " from "
+						+ jsonDoc + " due to " + e);
 			} catch (Exception e) {
 				LOGGER.error("Failed to parse document " + i + " from "
 						+ jsonDoc, e);

@@ -14,6 +14,7 @@ import java.util.Properties;
 import org.apache.commons.validator.GenericValidator;
 import org.apache.log4j.Logger;
 
+import com.plexobject.docusearch.Configuration;
 import com.plexobject.docusearch.domain.Document;
 import com.plexobject.docusearch.domain.DocumentBuilder;
 import com.plexobject.docusearch.persistence.DocumentRepository;
@@ -31,7 +32,7 @@ public abstract class BaseRelationMerger implements Runnable {
 		ATOM, HASH, ARRAY
 	}
 
-	static final int MAX_LIMIT = 2048;
+	static final int MAX_LIMIT = Configuration.getInstance().getPageSize();
 	Logger logger = Logger.getLogger(getClass());
 	Map<String, Boolean> seenDocIds = new HashMap<String, Boolean>();
 
@@ -115,7 +116,7 @@ public abstract class BaseRelationMerger implements Runnable {
 
 		if (GenericValidator.isBlankOrNull(fromIdValue)) {
 			throw new IllegalArgumentException("fromId " + fromId
-					+ " not found in " + sourceDocument);
+					+ " not found in source " + sourceDocument);
 		}
 		final String toIdValue = sourceDocument.getProperty(toId);
 		if (GenericValidator.isBlankOrNull(toIdValue)) {
@@ -146,14 +147,15 @@ public abstract class BaseRelationMerger implements Runnable {
 						docBuilder.put(toRelationName, extractAsAtom(
 								toDocument, newRelation));
 					}
-
-					final Document savedDocument = repository
-							.saveDocument(docBuilder.build());
-					if (docCount % 1000 == 0 && logger.isInfoEnabled()) {
-						logger.info(docCount + ": Added relation "
-								+ newRelation + " into " + savedDocument
-								+ " from join " + sourceDocument);
+					if (docCount > 0 && docCount % 1000 == 0
+							&& logger.isInfoEnabled()) {
+						logger.info(docCount + ": Saving relation "
+								+ newRelation + " from join " + fromDocument
+								+ " into " + toDocument + " resulting in  "
+								+ docBuilder.build());
 					}
+					repository.saveDocument(docBuilder.build());
+
 				}
 			}
 		} catch (PersistenceException e) {
@@ -197,12 +199,12 @@ public abstract class BaseRelationMerger implements Runnable {
 	@Override
 	public void run() {
 		try {
-			int startkey = 0;
+			String startkey = null;
 			List<Document> sourceDocuments = null;
 			final long started = System.currentTimeMillis();
 
 			while ((sourceDocuments = repository.getAllDocuments(
-					getSourceDatabase(), startkey, MAX_LIMIT)).size() > 0) {
+					getSourceDatabase(), startkey, null)).size() > 0) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Got " + sourceDocuments.size()
 							+ " for starting key " + startkey + ", limit "
@@ -210,7 +212,8 @@ public abstract class BaseRelationMerger implements Runnable {
 							+ sourceDocuments.get(0).getId());
 				}
 				merge(sourceDocuments);
-				startkey += sourceDocuments.size();
+				startkey = sourceDocuments.get(sourceDocuments.size() - 1)
+						.getId();
 			}
 			final long elapsed = System.currentTimeMillis() - started;
 			logger.info("Merged " + startkey + " records of "
@@ -245,12 +248,14 @@ public abstract class BaseRelationMerger implements Runnable {
 	protected void mergeAttributes(final Document sourceDocument,
 			final Document fromDocument, final Map<String, String> newRelation) {
 		for (String columnToMerge : fromColumnsToMerge) {
-			String value = fromDocument.getProperty(columnToMerge);
-			if (value == null) {
-				throw new IllegalArgumentException("Failed to find "
-						+ columnToMerge + " in " + fromDocument);
+			if (Document.isValidAttributeKey(columnToMerge)) {
+				String value = fromDocument.getProperty(columnToMerge);
+				if (value == null) {
+					throw new IllegalArgumentException("Failed to find "
+							+ columnToMerge + " in " + fromDocument);
+				}
+				newRelation.put(columnToMerge, value);
 			}
-			newRelation.put(columnToMerge, value);
 		}
 	}
 

@@ -2,11 +2,16 @@ package com.plexobject.docusearch.lucene;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.StringReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.Token;
+import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.DateTools;
 import org.apache.lucene.index.CheckIndex;
@@ -22,10 +27,12 @@ import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
+import org.apache.solr.analysis.SynonymMap;
 
 import com.plexobject.docusearch.Configuration;
 import com.plexobject.docusearch.domain.Document;
 import com.plexobject.docusearch.index.lucene.ThreadedIndexWriter;
+import com.plexobject.docusearch.lucene.analyzer.SynonymAnalyzer;
 
 /**
  * @author bhatti@plexobject.com
@@ -33,13 +40,16 @@ import com.plexobject.docusearch.index.lucene.ThreadedIndexWriter;
  */
 public final class LuceneUtils {
 	private static final Logger LOGGER = Logger.getLogger(LuceneUtils.class);
-	public static final Analyzer ANALYZER = new StandardAnalyzer(Version.LUCENE_CURRENT);
+	private static final String LUCENE_ANALYZER = "lucene.analyzer";
+	private static final String SYNONYM_ANALYZER_TYPE = "SynonymAnalyzer";
+	private static final String ANALYZER_TYPE = Configuration.getInstance()
+			.getProperty(LUCENE_ANALYZER, SYNONYM_ANALYZER_TYPE);
 
 	public static final String DEFAULT_OPERATOR = System.getProperty(
 			"lucene.operator", "OR");
 	public static final File INDEX_DIR = new File(System
 			.getProperty("user.home"), System.getProperty("lucene.dir",
-			"lucene"));
+			".lucene"));
 
 	public static final int RAM_BUF = Integer.getInteger("lucene.ram", 16);
 
@@ -52,7 +62,29 @@ public final class LuceneUtils {
 	private static final boolean LUCENE_DEBUG = Boolean
 			.getBoolean("lucene.debug");
 
+	private static Analyzer ANALYZER;
+
 	private LuceneUtils() {
+	}
+
+	public static synchronized Analyzer getDefaultAnalyzer() {
+		if (ANALYZER == null) {
+			if (ANALYZER_TYPE.equals(SYNONYM_ANALYZER_TYPE)) {
+				final SynonymMap map = new SynonymMap(true);
+				ANALYZER = new SynonymAnalyzer(map);
+
+			} else {
+				ANALYZER = new StandardAnalyzer(Version.LUCENE_CURRENT);
+			}
+			if (LOGGER.isInfoEnabled()) {
+				LOGGER.info("Default analyzer is " + ANALYZER);
+			}
+		}
+		return ANALYZER;
+	}
+
+	public static synchronized void setDefaultAnalyzer(final Analyzer a) {
+		ANALYZER = a;
 	}
 
 	public static Query docQuery(final String viewname, final String id) {
@@ -65,10 +97,7 @@ public final class LuceneUtils {
 	public static IndexWriter newWriter(final Directory dir) throws IOException {
 		final IndexWriter writer = new IndexWriter(dir, ANALYZER,
 				MaxFieldLength.UNLIMITED);
-		if (IndexWriter.isLocked(dir)) {
-			LOGGER.warn("***Unlocking " + dir + " directory for IndexWriter");
-			IndexWriter.unlock(dir);
-		}
+
 		return configWriter(writer);
 	}
 
@@ -131,12 +160,38 @@ public final class LuceneUtils {
 					LOGGER.warn("Index is not clean.");
 				}
 			}
+			if (IndexWriter.isLocked(d)) {
+				LOGGER.warn("***Unlocking " + d + " directory for indexing");
+				IndexWriter.unlock(d);
+			}
 			return d;
 
 		} catch (IOException e) {
 			LOGGER.error("Failed to unlock index", e);
 			throw new RuntimeException(e);
 		}
+	}
+
+	public static Token[] tokensFromAnalysis(Analyzer analyzer, String text)
+			throws IOException {
+		TokenStream stream = analyzer.tokenStream("contents", new StringReader(
+				text));
+
+		return tokensFromAnalysis(stream);
+	}
+
+	@SuppressWarnings("deprecation")
+	public static Token[] tokensFromAnalysis(TokenStream stream)
+			throws IOException {
+		final List<Token> tokenList = new ArrayList<Token>();
+		while (true) {
+			if (!stream.incrementToken()) {
+				break;
+			}
+			tokenList.add(stream.next());
+		}
+
+		return (Token[]) tokenList.toArray(new Token[0]);
 	}
 
 }
