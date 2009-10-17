@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Properties;
 
 import org.easymock.EasyMock;
@@ -15,8 +14,6 @@ import org.junit.Test;
 
 import com.plexobject.docusearch.domain.Document;
 import com.plexobject.docusearch.domain.DocumentBuilder;
-import com.plexobject.docusearch.persistence.ConfigurationRepository;
-import com.plexobject.docusearch.persistence.DocumentRepository;
 import com.plexobject.docusearch.persistence.ConfigurationRepository;
 import com.plexobject.docusearch.persistence.DocumentRepository;
 

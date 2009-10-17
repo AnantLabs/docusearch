@@ -75,7 +75,7 @@ public class IndexServiceImplTest {
 				.toString().contains("rebuilt index for " + COMPANIES));
 	}
 
-	@Test
+	//@Test
 	public final void testUpdate() {
 		EasyMock.expect(repository.getDocument(COMPANIES, "id")).andReturn(
 				newDocument(true));

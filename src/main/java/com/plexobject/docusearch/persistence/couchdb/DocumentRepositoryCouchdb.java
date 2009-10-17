@@ -492,8 +492,8 @@ public class DocumentRepositoryCouchdb implements DocumentRepository {
 					.second());
 			List<Document> docs = toDocuments(jsonDocs);
 
-			if (LOGGER.isInfoEnabled()) {
-				LOGGER.info("getAllDocuments(" + url + ") got " + docs.size());
+			if (LOGGER.isDebugEnabled()) {
+				LOGGER.debug("getAllDocuments(" + url + ") got " + docs.size());
 			}
 			return docs;
 		} catch (RestException e) {

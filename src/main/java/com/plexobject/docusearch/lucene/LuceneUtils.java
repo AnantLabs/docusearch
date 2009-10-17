@@ -41,9 +41,9 @@ import com.plexobject.docusearch.lucene.analyzer.SynonymAnalyzer;
 public final class LuceneUtils {
 	private static final Logger LOGGER = Logger.getLogger(LuceneUtils.class);
 	private static final String LUCENE_ANALYZER = "lucene.analyzer";
-	private static final String SYNONYM_ANALYZER_TYPE = "SynonymAnalyzer";
-	private static final String ANALYZER_TYPE = Configuration.getInstance()
-			.getProperty(LUCENE_ANALYZER, SYNONYM_ANALYZER_TYPE);
+	private static final String SYNONYM_analyzerType = "SynonymAnalyzer";
+	private static final String analyzerType = Configuration.getInstance()
+			.getProperty(LUCENE_ANALYZER);
 
 	public static final String DEFAULT_OPERATOR = System.getProperty(
 			"lucene.operator", "OR");
@@ -62,29 +62,29 @@ public final class LuceneUtils {
 	private static final boolean LUCENE_DEBUG = Boolean
 			.getBoolean("lucene.debug");
 
-	private static Analyzer ANALYZER;
+	private static Analyzer defaultAnalyzer;
 
 	private LuceneUtils() {
 	}
 
 	public static synchronized Analyzer getDefaultAnalyzer() {
-		if (ANALYZER == null) {
-			if (ANALYZER_TYPE.equals(SYNONYM_ANALYZER_TYPE)) {
+		if (defaultAnalyzer == null) {
+			if (SYNONYM_analyzerType.equals(analyzerType)) {
 				final SynonymMap map = new SynonymMap(true);
-				ANALYZER = new SynonymAnalyzer(map);
+				defaultAnalyzer = new SynonymAnalyzer(map);
 
 			} else {
-				ANALYZER = new StandardAnalyzer(Version.LUCENE_CURRENT);
+				defaultAnalyzer = new StandardAnalyzer(Version.LUCENE_CURRENT);
 			}
 			if (LOGGER.isInfoEnabled()) {
-				LOGGER.info("Default analyzer is " + ANALYZER);
+				LOGGER.info("Default analyzer is " + defaultAnalyzer);
 			}
 		}
-		return ANALYZER;
+		return defaultAnalyzer;
 	}
 
 	public static synchronized void setDefaultAnalyzer(final Analyzer a) {
-		ANALYZER = a;
+		defaultAnalyzer = a;
 	}
 
 	public static Query docQuery(final String viewname, final String id) {
@@ -95,7 +95,7 @@ public final class LuceneUtils {
 	}
 
 	public static IndexWriter newWriter(final Directory dir) throws IOException {
-		final IndexWriter writer = new IndexWriter(dir, ANALYZER,
+		final IndexWriter writer = new IndexWriter(dir, getDefaultAnalyzer(),
 				MaxFieldLength.UNLIMITED);
 
 		return configWriter(writer);
@@ -103,7 +103,7 @@ public final class LuceneUtils {
 
 	public static IndexWriter newThreadedWriter(final Directory dir)
 			throws IOException {
-		final IndexWriter writer = new ThreadedIndexWriter(dir, ANALYZER, true,
+		final IndexWriter writer = new ThreadedIndexWriter(dir, getDefaultAnalyzer(), true,
 				MaxFieldLength.UNLIMITED);
 		return configWriter(writer);
 	}

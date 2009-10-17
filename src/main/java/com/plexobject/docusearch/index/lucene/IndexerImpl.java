@@ -104,6 +104,9 @@ public class IndexerImpl implements Indexer {
 		final JSONObject json = Converters.getInstance().getConverter(
 				Object.class, JSONObject.class).convert(map);
 		final org.apache.lucene.document.Document ldoc = new org.apache.lucene.document.Document();
+		if (doc.getId() == null) {
+			throw new IllegalStateException("id not defined for " + doc);
+		}
 		ldoc.add(new Field(Document.DATABASE, doc.getDatabase(),
 				Field.Store.YES, Field.Index.NOT_ANALYZED));
 		ldoc.add(new Field(Document.ID, doc.getId(), Field.Store.YES,
@@ -150,8 +153,11 @@ public class IndexerImpl implements Indexer {
 		writer.deleteDocuments(LuceneUtils.docQuery(doc.getDatabase(), doc
 				.getId()));
 		writer.deleteDocuments(new Term(Document.ID, doc.getId()));
-
-		writer.addDocument(ldoc);
+		try {
+			writer.addDocument(ldoc);
+		} catch (RuntimeException e) {
+			throw new RuntimeException("Failed to index " + ldoc, e);
+		}
 
 		// writer.updateDocument(new Term(Document.ID, doc));
 		if (++numIndexed % 1000 == 0 && LOGGER.isInfoEnabled()) {

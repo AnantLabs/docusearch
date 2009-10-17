@@ -68,7 +68,7 @@ public class DocumentsDatabaseIndexer {
 			startkey = docs.get(docs.size()-1).getId();
 
 			succeeded += indexDocuments(dir, policy, docs);
-			if (total % 1000 == 0) {
+			if (total > 0 && total % 1000 == 0) {
 				final long elapsed = System.currentTimeMillis() - started;
 				LOGGER.info("--Indexed " + succeeded + "/" + total + "/"
 						+ startkey + " documents in " + elapsed
@@ -79,10 +79,12 @@ public class DocumentsDatabaseIndexer {
 				break;
 			}
 		}
-		final long elapsed = System.currentTimeMillis() - started;
-		LOGGER.info("Indexed " + succeeded + "/" + total + " - startkey "
+		if (total > 100) {
+		    final long elapsed = System.currentTimeMillis() - started;
+		    LOGGER.info("Indexed " + succeeded + "/" + total + " - startkey "
 				+ startkey + ", requests " + requests + ", records of " + db
 				+ " in " + elapsed + " milliseconds with policy " + policy);
+		}
 	}
 
 	public int indexDocuments(final File dir, final IndexPolicy policy,

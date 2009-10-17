@@ -13,7 +13,6 @@ import java.util.Map;
 import org.apache.commons.validator.GenericValidator;
 import org.apache.log4j.Logger;
 
-import com.plexobject.docusearch.Configuration;
 import com.plexobject.docusearch.domain.Document;
 import com.plexobject.docusearch.persistence.DocumentRepository;
 import com.plexobject.docusearch.persistence.PersistenceException;

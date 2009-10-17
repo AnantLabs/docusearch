@@ -56,7 +56,7 @@ public class DocumentRepositoryCouchdbTest {
 	@Test
 	public void testQuery() throws Exception {
 		final Map<String, Document> documents = createDocuments();
-		final String req = "{\"map\":\"function(doc) {if (doc.B == '2') {emit(null, doc);}}\"}";
+		final String req = "{\"map\":\"function(doc) {if (doc.B == '2' && doc.deleted != true) {emit(null, doc);}}\"}";
 
 		EasyMock.expect(httpClient.post(DB_NAME + "/_temp_view", req))
 				.andReturn(
@@ -80,7 +80,7 @@ public class DocumentRepositoryCouchdbTest {
 	@Test
 	public void testQueryNotFound() throws Exception {
 		createDocuments();
-		final String req = "{\"map\":\"function(doc) {if (doc.Z == '9') {emit(null, doc);}}\"}";
+		final String req = "{\"map\":\"function(doc) {if (doc.Z == '9' && doc.deleted != true) {emit(null, doc);}}\"}";
 
 		EasyMock.expect(httpClient.post(DB_NAME + "/_temp_view", req))
 				.andReturn(
@@ -270,7 +270,7 @@ public class DocumentRepositoryCouchdbTest {
 		}
 
 		EasyMock.expect(
-				httpClient.get(DB_NAME + "/_all_docs?startkey=%22" + first
+				httpClient.get(DB_NAME + "/_all_docs?limit=1024&startkey=%22" + first
 						+ "%22&endkey=%22" + last + "%22&include_docs=true"))
 				.andReturn(
 						new Tuple(RestClient.OK, prepareJsonReply(documents
