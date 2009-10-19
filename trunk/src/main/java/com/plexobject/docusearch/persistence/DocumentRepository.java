@@ -10,7 +10,7 @@ import com.plexobject.docusearch.domain.Document;
  * This interface defines APIs to read or save documents and metadata related to
  * documents.
  * 
- * @author bhatti@plexobject.com
+ * @author Shahzad Bhatti
  * 
  */
 public interface DocumentRepository {

@@ -41,7 +41,7 @@ import com.plexobject.docusearch.query.SearchDocBuilder;
 import com.plexobject.docusearch.query.SearchDocList;
 
 /**
- * @author bhatti@plexobject.com
+ * @author Shahzad Bhatti
  * 
  */
 @SuppressWarnings("deprecation")

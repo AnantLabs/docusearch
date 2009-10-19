@@ -27,7 +27,7 @@ import com.plexobject.docusearch.persistence.PersistenceException;
 import com.plexobject.docusearch.persistence.couchdb.DocumentRepositoryCouchdb;
 
 /**
- * @author bhatti@plexobject.com
+ * @author Shahzad Bhatti
  * 
  */
 public class DocumentRepositoryCouchdbTest {

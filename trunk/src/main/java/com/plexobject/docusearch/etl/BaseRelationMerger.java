@@ -22,7 +22,7 @@ import com.plexobject.docusearch.persistence.PersistenceException;
 import com.plexobject.docusearch.persistence.couchdb.DocumentRepositoryCouchdb;
 
 /**
- * @author bhatti@plexobject.com
+ * @author Shahzad Bhatti
  * 
  *         Base class for adding relationships to the documents.
  * 

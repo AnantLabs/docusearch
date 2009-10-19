@@ -8,7 +8,7 @@ import com.plexobject.docusearch.query.QueryPolicy;
 
 /**
  * 
- * @author bhatti@plexobject.com
+ * @author Shahzad Bhatti
  * 
  */
 public class JsonToQueryPolicy implements Converter<JSONObject, QueryPolicy> {

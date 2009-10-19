@@ -26,7 +26,7 @@ import com.plexobject.docusearch.index.Indexer;
 import com.plexobject.docusearch.lucene.LuceneUtils;
 
 /**
- * @author bhatti@plexobject.com
+ * @author Shahzad Bhatti
  * 
  */
 public class IndexerImpl implements Indexer {

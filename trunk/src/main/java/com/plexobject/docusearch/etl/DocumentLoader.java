@@ -20,7 +20,7 @@ import com.plexobject.docusearch.persistence.RepositoryFactory;
 import com.plexobject.docusearch.query.QueryPolicy;
 
 /**
- * @author bhatti@plexobject.com
+ * @author Shahzad Bhatti
  * 
  */
 public class DocumentLoader extends DelimitedFileParser {

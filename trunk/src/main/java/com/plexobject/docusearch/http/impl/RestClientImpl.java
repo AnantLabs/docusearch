@@ -27,7 +27,7 @@ import com.plexobject.docusearch.http.RestException;
 /**
  * This class provides APIs to call remote Web service with JSON payload
  *
- * @author bhatti@plexobject.com
+ * @author Shahzad Bhatti
  */
 public class RestClientImpl implements RestClient {
 	private static final Logger LOGGER = Logger.getLogger(RestClientImpl.class);

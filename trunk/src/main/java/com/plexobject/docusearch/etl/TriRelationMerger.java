@@ -18,7 +18,7 @@ import com.plexobject.docusearch.persistence.DocumentRepository;
 import com.plexobject.docusearch.persistence.couchdb.DocumentRepositoryCouchdb;
 
 /**
- * @author bhatti@plexobject.com
+ * @author Shahzad Bhatti
  * 
  *         This allows copying one or more attributes from repository (table) to
  *         another repository using a join repository.

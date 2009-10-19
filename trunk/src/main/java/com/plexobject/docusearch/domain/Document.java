@@ -15,7 +15,7 @@ import org.apache.commons.validator.GenericValidator;
  * This class represents document stored in the document-based database.
  * Note: This is immutable and non-thread safe class.
  * 
- * @author bhatti@plexobject.com
+ * @author Shahzad Bhatti
  */
 public class Document implements Map<String, Object> {
 	public static final String DATABASE = "dbname";

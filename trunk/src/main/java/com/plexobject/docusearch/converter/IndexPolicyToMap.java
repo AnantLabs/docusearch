@@ -9,7 +9,7 @@ import com.plexobject.docusearch.index.IndexPolicy;
 
 /**
  * 
- * @author bhatti@plexobject.com
+ * @author Shahzad Bhatti
  * 
  */
 public class IndexPolicyToMap implements
