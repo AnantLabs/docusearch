@@ -8,7 +8,7 @@ import java.util.Map.Entry;
 /**
  * This class represents document stored in the document-based database.
  * 
- * @author bhatti@plexobject.com
+ * @author Shahzad Bhatti
  */
 public class DocumentBuilder implements Builder<Document> {
 	protected final Map<String, Object> properties = new HashMap<String, Object>();

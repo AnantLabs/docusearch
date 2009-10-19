@@ -35,7 +35,7 @@ import com.plexobject.docusearch.index.lucene.ThreadedIndexWriter;
 import com.plexobject.docusearch.lucene.analyzer.SynonymAnalyzer;
 
 /**
- * @author bhatti@plexobject.com
+ * @author Shahzad Bhatti
  * 
  */
 public final class LuceneUtils {

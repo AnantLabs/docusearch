@@ -3,7 +3,7 @@ package com.plexobject.docusearch.query;
 /**
  * This interface searches index for the given keywords
  * 
- * @author bhatti@plexobject.com
+ * @author Shahzad Bhatti
  * 
  */
 public interface Query {

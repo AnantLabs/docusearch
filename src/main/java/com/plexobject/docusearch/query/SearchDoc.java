@@ -7,7 +7,7 @@ import com.plexobject.docusearch.domain.Document;
 /**
  * This class represents document stored in the document-based database.
  * 
- * @author bhatti@plexobject.com
+ * @author Shahzad Bhatti
  */
 public class SearchDoc extends Document {
 	public static final String SCORE = "score";

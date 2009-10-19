@@ -13,7 +13,7 @@ import com.plexobject.docusearch.domain.Document;
 import com.plexobject.docusearch.persistence.RepositoryFactory;
 
 /**
- * @author bhatti@plexobject.com
+ * @author Shahzad Bhatti
  * 
  */
 public final class Main {

@@ -34,7 +34,7 @@ import com.plexobject.docusearch.persistence.PersistenceException;
 /**
  * This class implements DocumentRepository using CouchDB.
  * 
- * @author bhatti@plexobject.com
+ * @author Shahzad Bhatti
  * 
  */
 public class DocumentRepositoryCouchdb implements DocumentRepository {

@@ -4,7 +4,7 @@ import javax.ws.rs.core.Response;
 
 /**
  * 
- * @author bhatti@plexobject.com
+ * @author Shahzad Bhatti
  * 
  */
 public interface IndexService {
