@@ -270,11 +270,10 @@ public class DocumentRepositoryCouchdbTest {
 		}
 
 		EasyMock.expect(
-				httpClient.get(DB_NAME + "/_all_docs?limit=1024&startkey=%22" + first
-						+ "%22&endkey=%22" + last + "%22&include_docs=true"))
-				.andReturn(
-						new Tuple(RestClient.OK, prepareJsonReply(documents
-								.values())));
+				httpClient.get(DB_NAME + "/_all_docs?limit=1024&startkey=%22"
+						+ first + "%22&endkey=%22" + last
+						+ "%22&include_docs=true")).andReturn(
+				new Tuple(RestClient.OK, prepareJsonReply(documents.values())));
 		EasyMock.replay(httpClient);
 
 		List<Document> saved = repository.getAllDocuments(DB_NAME, first, last);
@@ -365,7 +364,7 @@ public class DocumentRepositoryCouchdbTest {
 		return documents;
 	}
 
-	private String prepareJsonReply(Collection<Document> documents) {
+	private String prepareJsonReply(final Collection<Document> documents) {
 		final StringBuilder jsonReply = new StringBuilder(
 				"{\"total_rows\":\"21\",\"offset\":\"0\",\"rows\":[");
 
