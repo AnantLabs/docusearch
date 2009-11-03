@@ -1,8 +1,7 @@
 package com.plexobject.docusearch.etl;
+
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Properties;
 
@@ -16,6 +15,7 @@ import com.plexobject.docusearch.domain.Document;
 import com.plexobject.docusearch.domain.DocumentBuilder;
 import com.plexobject.docusearch.persistence.ConfigurationRepository;
 import com.plexobject.docusearch.persistence.DocumentRepository;
+import com.plexobject.docusearch.persistence.PagedList;
 
 public class BiRelationMergerTest {
 	private static final String DB_NAME = "MYDB";
@@ -167,9 +167,9 @@ public class BiRelationMergerTest {
 		EasyMock.reset(repository);
 		EasyMock.reset(configRepository);
 		EasyMock.expect(repository.getAllDocuments(DB_NAME, null, null))
-				.andReturn(Arrays.asList(fromDoc1, fromDoc2));
+				.andReturn(PagedList.asList(fromDoc1, fromDoc2));
 		EasyMock.expect(repository.getAllDocuments(DB_NAME, "2", null))
-				.andReturn(Collections.<Document> emptyList());
+				.andReturn(PagedList.<Document> emptyList());
 		EasyMock.expect(
 				repository.query(TO_DB_NAME, new HashMap<String, String>() {
 					{
@@ -213,4 +213,3 @@ public class BiRelationMergerTest {
 	}
 
 }
-

@@ -35,6 +35,7 @@ public class MapToIndexPolicyTest {
 		Assert.assertEquals(10, policy.getFields().size());
 		Assert.assertEquals(10, policy.getScore());
 		Assert.assertEquals(20.5, policy.getBoost(), 0.0001);
+		Assert.assertEquals("std", policy.getAnalyzer());
 
 		Map<String, Integer> count = new HashMap<String, Integer>();
 
@@ -63,6 +64,7 @@ public class MapToIndexPolicyTest {
 		final Map<String, Object> map = new HashMap<String, Object>();
 		map.put(Constants.SCORE, 10);
 		map.put(Constants.BOOST, 20.5);
+		map.put(Constants.ANALYZER, "std");
 		final Collection<Map<String, Object>> fields = new ArrayList<Map<String, Object>>();
 		for (int i = 0; i < 10; i++) {
 			final Map<String, Object> field = new HashMap<String, Object>();
