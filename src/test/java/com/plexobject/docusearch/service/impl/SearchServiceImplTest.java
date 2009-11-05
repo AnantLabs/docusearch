@@ -35,7 +35,7 @@ import com.plexobject.docusearch.service.SearchService;
 import com.plexobject.docusearch.service.impl.SearchServiceImpl;
 
 public class SearchServiceImplTest {
-    private static final String COMPANIES = "test_companies";
+    private static final String MASTER = "test_master";
     private static final String DB_NAME = "MYDB";
     private static final int MAX_LIMIT = Configuration.getInstance()
             .getPageSize();
@@ -90,7 +90,7 @@ public class SearchServiceImplTest {
 
     @Test
     public void testQueryWithNoKeywordsIndex() {
-        service.query(COMPANIES, "", true, 0, MAX_LIMIT, true);
+        service.query(MASTER, "", true, 0, MAX_LIMIT, true);
     }
 
     @Test
@@ -98,18 +98,18 @@ public class SearchServiceImplTest {
         final QueryPolicy policy = newQueryPolicy();
         final QueryCriteria criteria = new QueryCriteria()
                 .setKeywords("keywords");
-        EasyMock.expect(configRepository.getQueryPolicy(COMPANIES)).andReturn(
+        EasyMock.expect(configRepository.getQueryPolicy(MASTER)).andReturn(
                 policy);
         EasyMock.expect(query.search(criteria, policy, true, 0, MAX_LIMIT))
                 .andReturn(newDocuments());
-        EasyMock.expect(repository.getDocument(COMPANIES, "id")).andReturn(
+        EasyMock.expect(repository.getDocument(MASTER, "id")).andReturn(
                 newDocument());
 
         EasyMock.replay(repository);
         EasyMock.replay(configRepository);
         EasyMock.replay(query);
 
-        Response response = service.query(COMPANIES, "keywords", true, 0,
+        Response response = service.query(MASTER, "keywords", true, 0,
                 MAX_LIMIT, true);
         EasyMock.verify(repository);
         EasyMock.verify(configRepository);
@@ -139,18 +139,18 @@ public class SearchServiceImplTest {
         final QueryPolicy policy = newQueryPolicy();
         final QueryCriteria criteria = new QueryCriteria()
                 .setKeywords("keywords");
-        EasyMock.expect(configRepository.getQueryPolicy(COMPANIES)).andReturn(
+        EasyMock.expect(configRepository.getQueryPolicy(MASTER)).andReturn(
                 policy);
         EasyMock.expect(query.search(criteria, policy, false, 0, MAX_LIMIT))
                 .andReturn(newDocuments());
-        EasyMock.expect(repository.getDocument(COMPANIES, "id")).andReturn(
+        EasyMock.expect(repository.getDocument(MASTER, "id")).andReturn(
                 newDocument());
 
         EasyMock.replay(repository);
         EasyMock.replay(configRepository);
         EasyMock.replay(query);
 
-        Response response = service.query(COMPANIES, "keywords", false, 0,
+        Response response = service.query(MASTER, "keywords", false, 0,
                 MAX_LIMIT, true);
         EasyMock.verify(repository);
         EasyMock.verify(configRepository);
@@ -177,14 +177,14 @@ public class SearchServiceImplTest {
 
     @Test
     public final void testQueryWithException() throws JSONException {
-        EasyMock.expect(configRepository.getQueryPolicy(COMPANIES)).andThrow(
+        EasyMock.expect(configRepository.getQueryPolicy(MASTER)).andThrow(
                 new IllegalArgumentException());
 
         EasyMock.replay(repository);
         EasyMock.replay(configRepository);
         EasyMock.replay(query);
 
-        Response response = service.query(COMPANIES, "keywords", false, 0,
+        Response response = service.query(MASTER, "keywords", false, 0,
                 MAX_LIMIT, true);
         EasyMock.verify(repository);
         EasyMock.verify(configRepository);
@@ -197,18 +197,18 @@ public class SearchServiceImplTest {
     public final void testMoreLikeThis() throws JSONException {
         final QueryPolicy policy = newQueryPolicy();
 
-        EasyMock.expect(configRepository.getQueryPolicy(COMPANIES)).andReturn(
+        EasyMock.expect(configRepository.getQueryPolicy(MASTER)).andReturn(
                 policy);
         EasyMock.expect(query.moreLikeThis(1, policy, 0, MAX_LIMIT)).andReturn(
                 newDocuments());
-        EasyMock.expect(repository.getDocument(COMPANIES, "id")).andReturn(
+        EasyMock.expect(repository.getDocument(MASTER, "id")).andReturn(
                 newDocument());
 
         EasyMock.replay(repository);
         EasyMock.replay(configRepository);
         EasyMock.replay(query);
 
-        Response response = service.moreLikeThis(COMPANIES, 1, 0, MAX_LIMIT,
+        Response response = service.moreLikeThis(MASTER, 1, 0, MAX_LIMIT,
                 true);
         EasyMock.verify(repository);
         EasyMock.verify(configRepository);
@@ -232,7 +232,7 @@ public class SearchServiceImplTest {
     public final void testMoreLikeThisWithoutDetails() throws JSONException {
         final QueryPolicy policy = newQueryPolicy();
 
-        EasyMock.expect(configRepository.getQueryPolicy(COMPANIES)).andReturn(
+        EasyMock.expect(configRepository.getQueryPolicy(MASTER)).andReturn(
                 policy);
         EasyMock.expect(query.moreLikeThis(1, policy, 0, MAX_LIMIT)).andReturn(
                 newDocuments());
@@ -241,7 +241,7 @@ public class SearchServiceImplTest {
         EasyMock.replay(configRepository);
         EasyMock.replay(query);
 
-        Response response = service.moreLikeThis(COMPANIES, 1, 0, MAX_LIMIT,
+        Response response = service.moreLikeThis(MASTER, 1, 0, MAX_LIMIT,
                 false);
         EasyMock.verify(repository);
         EasyMock.verify(configRepository);
@@ -265,7 +265,7 @@ public class SearchServiceImplTest {
     public final void testMoreLikeThisWithException() throws JSONException {
         final QueryPolicy policy = newQueryPolicy();
 
-        EasyMock.expect(configRepository.getQueryPolicy(COMPANIES)).andReturn(
+        EasyMock.expect(configRepository.getQueryPolicy(MASTER)).andReturn(
                 policy);
         EasyMock.expect(query.moreLikeThis(1, policy, 0, MAX_LIMIT)).andThrow(
                 new IllegalArgumentException());
@@ -274,7 +274,7 @@ public class SearchServiceImplTest {
         EasyMock.replay(configRepository);
         EasyMock.replay(query);
 
-        Response response = service.moreLikeThis(COMPANIES, 1, 0, MAX_LIMIT,
+        Response response = service.moreLikeThis(MASTER, 1, 0, MAX_LIMIT,
                 true);
         EasyMock.verify(repository);
         EasyMock.verify(configRepository);
@@ -288,7 +288,7 @@ public class SearchServiceImplTest {
         final QueryPolicy policy = newQueryPolicy();
         final QueryCriteria criteria = new QueryCriteria()
                 .setKeywords("keywords");
-        EasyMock.expect(configRepository.getQueryPolicy(COMPANIES)).andReturn(
+        EasyMock.expect(configRepository.getQueryPolicy(MASTER)).andReturn(
                 policy);
         EasyMock.expect(query.explain(criteria, policy, 0, MAX_LIMIT))
                 .andReturn(Arrays.asList("explain1", "explain2"));
@@ -298,7 +298,7 @@ public class SearchServiceImplTest {
         EasyMock.replay(query);
 
         Response response = service
-                .explain(COMPANIES, "keywords", 0, MAX_LIMIT);
+                .explain(MASTER, "keywords", 0, MAX_LIMIT);
         EasyMock.verify(repository);
         EasyMock.verify(configRepository);
         EasyMock.verify(query);
@@ -327,7 +327,7 @@ public class SearchServiceImplTest {
 
     @Test
     public final void testExplainWithBadKeywords() throws JSONException {
-        Response response = service.explain(COMPANIES, "", 0, MAX_LIMIT);
+        Response response = service.explain(MASTER, "", 0, MAX_LIMIT);
         Assert.assertEquals(RestClient.CLIENT_ERROR_BAD_REQUEST, response
                 .getStatus());
 
@@ -337,7 +337,7 @@ public class SearchServiceImplTest {
     public final void testTopTerms() throws JSONException {
         final QueryPolicy policy = newQueryPolicy();
 
-        EasyMock.expect(configRepository.getQueryPolicy(COMPANIES)).andReturn(
+        EasyMock.expect(configRepository.getQueryPolicy(MASTER)).andReturn(
                 policy);
         EasyMock.expect(query.getTopRankingTerms(policy, MAX_LIMIT)).andReturn(
                 Arrays.asList(new RankedTerm("name1", "value1", 1),
@@ -347,7 +347,7 @@ public class SearchServiceImplTest {
         EasyMock.replay(configRepository);
         EasyMock.replay(query);
 
-        Response response = service.getTopRankingTerms(COMPANIES, MAX_LIMIT);
+        Response response = service.getTopRankingTerms(MASTER, MAX_LIMIT);
         EasyMock.verify(repository);
         EasyMock.verify(configRepository);
         EasyMock.verify(query);
