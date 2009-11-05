@@ -18,8 +18,10 @@ import org.junit.Test;
 import com.plexobject.docusearch.converter.Converters;
 import com.plexobject.docusearch.domain.Document;
 import com.plexobject.docusearch.domain.DocumentBuilder;
+import com.plexobject.docusearch.http.RestClient;
 import com.plexobject.docusearch.persistence.ConfigurationRepository;
 import com.plexobject.docusearch.persistence.DocumentRepository;
+import com.plexobject.docusearch.persistence.PersistenceException;
 import com.plexobject.docusearch.persistence.RepositoryFactory;
 import com.plexobject.docusearch.service.RepositoryService;
 
@@ -46,6 +48,196 @@ public class RepositoryServiceImplTest {
 
     @After
     public void tearDown() throws Exception {
+    }
+
+    @Test
+    public void testDefaultConstructor() {
+        new RepositoryServiceImpl();
+    }
+
+    @Test
+    public final void testDeleteWithNullDatabase() throws JSONException {
+        Response response = service.delete(null, "id", "ver");
+        Assert.assertEquals(RestClient.CLIENT_ERROR_BAD_REQUEST, response
+                .getStatus());
+
+    }
+
+    @Test
+    public final void testDeleteWithBadDatabase() throws JSONException {
+        Response response = service.delete("bad\"", "id", "ver");
+        Assert.assertEquals(RestClient.CLIENT_ERROR_BAD_REQUEST, response
+                .getStatus());
+
+    }
+
+    @Test
+    public final void testDeleteWithBadId() throws JSONException {
+        Response response = service.delete(DB_NAME, "", "ver");
+        Assert.assertEquals(RestClient.CLIENT_ERROR_BAD_REQUEST, response
+                .getStatus());
+
+    }
+
+    @Test
+    public final void testDeleteWithBadVersion() throws JSONException {
+        Response response = service.delete(DB_NAME, "id", "");
+        Assert.assertEquals(RestClient.CLIENT_ERROR_BAD_REQUEST, response
+                .getStatus());
+
+    }
+
+    @Test
+    public final void testDeleteWithPersistenceException() throws JSONException {
+        EasyMock.expect(repository.deleteDocument(DB_NAME, "id", "1.0"))
+                .andThrow(new PersistenceException("error"));
+
+        EasyMock.replay(repository);
+        EasyMock.replay(configRepository);
+
+        Response response = service.delete(DB_NAME, "id", "1.0");
+        verifyMock();
+
+        Assert.assertEquals(500, response.getStatus());
+    }
+
+    @Test
+    public final void testGetWithNullDatabase() throws JSONException {
+        Response response = service.get(null, "id");
+        Assert.assertEquals(RestClient.CLIENT_ERROR_BAD_REQUEST, response
+                .getStatus());
+
+    }
+
+    @Test
+    public final void testGetWithBadDatabase() throws JSONException {
+        Response response = service.get("bad\"", "id");
+        Assert.assertEquals(RestClient.CLIENT_ERROR_BAD_REQUEST, response
+                .getStatus());
+
+    }
+
+    @Test
+    public final void testGetWithBadId() throws JSONException {
+        Response response = service.get(DB_NAME, "");
+        Assert.assertEquals(RestClient.CLIENT_ERROR_BAD_REQUEST, response
+                .getStatus());
+
+    }
+
+    @Test
+    public final void testGetWithPersistenceException() throws JSONException {
+        EasyMock.expect(repository.getDocument(DB_NAME, "id")).andThrow(
+                new PersistenceException("error"));
+
+        EasyMock.replay(repository);
+        EasyMock.replay(configRepository);
+
+        Response response = service.get(DB_NAME, "id");
+        verifyMock();
+
+        Assert.assertEquals(500, response.getStatus());
+    }
+
+    @Test
+    public final void testPostWithNullDatabase() throws JSONException {
+        Response response = service.post(null, "body");
+        Assert.assertEquals(RestClient.CLIENT_ERROR_BAD_REQUEST, response
+                .getStatus());
+
+    }
+
+    @Test
+    public final void testPostWithBadDatabase() throws JSONException {
+        Response response = service.post("bad\"", "body");
+        Assert.assertEquals(RestClient.CLIENT_ERROR_BAD_REQUEST, response
+                .getStatus());
+
+    }
+
+    @Test
+    public final void testPostWithBadBody() throws JSONException {
+        Response response = service.post(DB_NAME, "");
+        Assert.assertEquals(RestClient.CLIENT_ERROR_BAD_REQUEST, response
+                .getStatus());
+
+    }
+
+    @Test
+    public final void testPostWithPersistenceException() throws JSONException {
+        final Document original = newDocument(START_ID + 10, null);
+        final String jsonOriginal = Converters.getInstance().getConverter(
+                Object.class, JSONObject.class).convert(original).toString();
+
+        EasyMock.expect(repository.saveDocument(original)).andThrow(
+                new PersistenceException("error"));
+
+        EasyMock.replay(repository);
+        EasyMock.replay(configRepository);
+
+        Response response = service.post(DB_NAME, jsonOriginal);
+        verifyMock();
+
+        Assert.assertEquals(500, response.getStatus());
+    }
+
+    @Test
+    public final void testPutWithNullDatabase() throws JSONException {
+        Response response = service.put(null, "id", "ver", "body");
+        Assert.assertEquals(RestClient.CLIENT_ERROR_BAD_REQUEST, response
+                .getStatus());
+
+    }
+
+    @Test
+    public final void testPutWithBadDatabase() throws JSONException {
+        Response response = service.put("bad\"", "id", "ver", "body");
+        Assert.assertEquals(RestClient.CLIENT_ERROR_BAD_REQUEST, response
+                .getStatus());
+
+    }
+
+    @Test
+    public final void testPuttWithBadId() throws JSONException {
+        Response response = service.put(DB_NAME, "", "ver", "");
+        Assert.assertEquals(RestClient.CLIENT_ERROR_BAD_REQUEST, response
+                .getStatus());
+
+    }
+
+    @Test
+    public final void testPuttWithBadVer() throws JSONException {
+        Response response = service.put(DB_NAME, "id", "", "body");
+        Assert.assertEquals(RestClient.SERVER_INTERNAL_ERROR, response
+                .getStatus());
+
+    }
+
+    @Test
+    public final void testPuttWithBadBody() throws JSONException {
+        Response response = service.put(DB_NAME, "id", "ver", "");
+        Assert.assertEquals(RestClient.CLIENT_ERROR_BAD_REQUEST, response
+                .getStatus());
+
+    }
+
+    @Test
+    public final void testPutWithPersistenceException() throws JSONException {
+        final Document original = newDocument(START_ID + 100, "2.0");
+        final String jsonOriginal = Converters.getInstance().getConverter(
+                Object.class, JSONObject.class).convert(original).toString();
+
+        EasyMock.expect(repository.saveDocument(original)).andThrow(
+                new PersistenceException("error"));
+
+        EasyMock.replay(repository);
+        EasyMock.replay(configRepository);
+
+        Response response = service.put(DB_NAME,
+                String.valueOf(START_ID + 100), "2.0", jsonOriginal);
+        verifyMock();
+
+        Assert.assertEquals(500, response.getStatus());
     }
 
     @Test

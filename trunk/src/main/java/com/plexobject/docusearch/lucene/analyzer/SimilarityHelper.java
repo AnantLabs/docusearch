@@ -1,36 +1,33 @@
 package com.plexobject.docusearch.lucene.analyzer;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.apache.lucene.search.spell.SpellChecker;
-import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.FSDirectory;
-
-import com.plexobject.docusearch.lucene.LuceneUtils;
 
 public class SimilarityHelper {
+    @SuppressWarnings("unused")
     private static final String TRAINING_SPELL_CHECKER_EXT = ".tsc";
+    @SuppressWarnings("unused")
     private static final String COMPILED_SPELLING_FILE_EXT = ".csc";
+    @SuppressWarnings("unused")
     private static final Logger LOGGER = Logger
             .getLogger(SimilarityHelper.class);
+    @SuppressWarnings("unused")
     private final static int NGRAM_LENGTH = 7;
+    @SuppressWarnings("unused")
     private final static double MATCH_WEIGHT = 0.0;
+    @SuppressWarnings("unused")
     private final static double DELETE_WEIGHT = -5.0;
+    @SuppressWarnings("unused")
     private final static double INSERT_WEIGHT = -5.0;
+    @SuppressWarnings("unused")
     private final static double SUBSTITUTE_WEIGHT = -5.0;
+    @SuppressWarnings("unused")
     private final static double TRANSPOSE_WEIGHT = -5.0;
+    @SuppressWarnings("unused")
     private volatile Map<String, SpellChecker> scMap = new HashMap<String, SpellChecker>();
     //private volatile Map<String, CompiledSpellChecker> cscMap = new HashMap<String, CompiledSpellChecker>();
     //private volatile Map<String, TrainSpellChecker> tscMap = new HashMap<String, TrainSpellChecker>();

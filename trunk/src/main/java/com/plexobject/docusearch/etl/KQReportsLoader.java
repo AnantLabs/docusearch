@@ -22,10 +22,12 @@ import com.plexobject.docusearch.metrics.Timer;
 import com.plexobject.docusearch.persistence.DocumentRepository;
 import com.plexobject.docusearch.persistence.PersistenceException;
 import com.plexobject.docusearch.persistence.RepositoryFactory;
-import com.plexobject.docusearch.util.ParagraphIterator;
 import com.plexobject.docusearch.util.SentenceIterator;
 
 public class KQReportsLoader implements Runnable {
+    private static final int MIN_PARAGRAPH_LENGTH = 512;
+    private static final int MIN_SENTENCE_LENGTH = 128;
+
     enum Type {
         K10("10K"), Q10("10Q");
         private String name;
@@ -141,24 +143,29 @@ public class KQReportsLoader implements Runnable {
         final String id = name.substring(start + 1, end);
         final Type type = name.contains("K") ? Type.K10 : Type.Q10;
         final String allContents = IOUtils.toString(reader);
-        final ParagraphIterator paragraphIterator = new ParagraphIterator(
+        final SentenceIterator paragraphIterator = new SentenceIterator(
                 allContents);
 
         final StringBuilder firstParagraph = new StringBuilder();
-        while (firstParagraph.length() < 80) {
+        final StringBuilder firstSentence = new StringBuilder();
+
+        while (firstParagraph.length() < MIN_PARAGRAPH_LENGTH) {
+            if (firstSentence.length() < MIN_SENTENCE_LENGTH) {
+                firstSentence.append(paragraphIterator.next() + "\n");
+            }
             firstParagraph.append(paragraphIterator.next() + "\n");
         }
-        final String firstSentence = new SentenceIterator(firstParagraph
-                .toString()).next();
+
         final StringBuilder allButFirstParagraph = new StringBuilder();
         while (paragraphIterator.hasNext()) {
             allButFirstParagraph.append(paragraphIterator.next());
         }
 
         Document doc = new DocumentBuilder(database).setId(id).put(TYPE,
-                type.getName()).put(FIRST_SENTENCE, firstSentence).put(
-                FIRST_PARAGRAPH, firstParagraph.toString()).put(
-                REST_OF_CONTENTS, allButFirstParagraph.toString()).build();
+                type.getName()).put(FIRST_SENTENCE, firstSentence.toString())
+                .put(FIRST_PARAGRAPH, firstParagraph.toString()).put(
+                        REST_OF_CONTENTS, allButFirstParagraph.toString())
+                .build();
         try {
             return repository.saveDocument(doc);
         } catch (PersistenceException e) {

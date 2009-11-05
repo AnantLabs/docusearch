@@ -16,6 +16,7 @@ import java.util.PriorityQueue;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.commons.validator.GenericValidator;
 import org.apache.log4j.Logger;
 import org.apache.lucene.document.DateTools;
 import org.apache.lucene.document.Field;
@@ -237,10 +238,11 @@ public class QueryImpl implements Query {
 
     @Override
     public Collection<RankedTerm> getTopRankingTerms(final QueryPolicy policy,
-            final int numTerms) {
+            final int maxTerms) {
+        final int numTerms = Math.max(maxTerms, 64);
         final Map<String, Boolean> junkWords = new HashMap<String, Boolean>();
         final PriorityQueue<RankedTerm> rtq = new PriorityQueue<RankedTerm>(
-                numTerms, new Comparator<RankedTerm>() {
+                Math.max(numTerms, 64), new Comparator<RankedTerm>() {
 
                     @Override
                     public int compare(final RankedTerm first,
@@ -390,9 +392,17 @@ public class QueryImpl implements Query {
             final IndexSearcher searcher, final QueryCriteria criteria,
             final QueryPolicy policy, final Collection<String> similarWords)
             throws IOException, ParseException {
+        if (GenericValidator.isBlankOrNull(criteria.getKeywords())) {
+            throw new IllegalArgumentException("keywords not specified");
+        }
         final BooleanQuery query = new BooleanQuery();
         final boolean wildMatch = criteria.getKeywords().indexOf('*') != -1;
         for (QueryPolicy.Field field : policy.getFields()) {
+            if (GenericValidator.isBlankOrNull(field.name)) {
+                throw new IllegalArgumentException(
+                        "field name not specified for " + field + " in policy "
+                                + policy);
+            }
             final Term term = new Term(field.name, criteria.getKeywords());
 
             final org.apache.lucene.search.Query q = wildMatch ? new WildcardQuery(

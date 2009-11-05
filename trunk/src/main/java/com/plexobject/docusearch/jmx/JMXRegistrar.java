@@ -17,7 +17,6 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.validator.GenericValidator;
 import org.apache.log4j.Logger;
 
-import com.plexobject.docusearch.domain.Document;
 import com.plexobject.docusearch.jmx.impl.Log4jJMXBeanImpl;
 import com.plexobject.docusearch.jmx.impl.ServiceJMXBeanImpl;
 
@@ -88,7 +87,7 @@ public class JMXRegistrar {
      */
     @Override
     public boolean equals(Object object) {
-        if (!(object instanceof Document)) {
+        if (!(object instanceof JMXRegistrar)) {
             return false;
         }
         JMXRegistrar rhs = (JMXRegistrar) object;

@@ -11,9 +11,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.plexobject.docusearch.converter.Converters;
+import com.plexobject.docusearch.http.RestClient;
 import com.plexobject.docusearch.index.IndexPolicy;
 import com.plexobject.docusearch.persistence.ConfigurationRepository;
 import com.plexobject.docusearch.persistence.DocumentRepository;
+import com.plexobject.docusearch.persistence.PersistenceException;
 import com.plexobject.docusearch.persistence.RepositoryFactory;
 import com.plexobject.docusearch.query.QueryPolicy;
 import com.plexobject.docusearch.service.ConfigurationService;
@@ -40,6 +42,68 @@ public class ConfigurationServiceImplTest {
 
     @After
     public void tearDown() throws Exception {
+    }
+
+    @Test
+    public void testDefaultConstructor() {
+        new ConfigurationServiceImpl();
+    }
+
+    @Test
+    public final void testGetWithBadId() throws JSONException {
+        Response response = service.getIndexPolicy("");
+        Assert.assertEquals(RestClient.CLIENT_ERROR_BAD_REQUEST, response
+                .getStatus());
+
+    }
+
+    @Test
+    public final void testGetWithPersistenceException() throws JSONException {
+        EasyMock.expect(configRepository.getIndexPolicy(DB_NAME)).andThrow(
+                new PersistenceException(""));
+
+        EasyMock.replay(repository);
+        EasyMock.replay(configRepository);
+
+        Response response = service.getIndexPolicy(DB_NAME);
+        verifyMock();
+
+        Assert.assertEquals(500, response.getStatus());
+    }
+
+    @Test
+    public final void testSaveWithBadDatabase() throws JSONException {
+        Response response = service.saveIndexPolicy("", "{}");
+        Assert.assertEquals(RestClient.CLIENT_ERROR_BAD_REQUEST, response
+                .getStatus());
+
+    }
+
+    @Test
+    public final void testSavetWithBadBody() throws JSONException {
+        Response response = service.saveIndexPolicy(DB_NAME, "");
+        Assert.assertEquals(RestClient.CLIENT_ERROR_BAD_REQUEST, response
+                .getStatus());
+
+    }
+
+    @Test
+    public final void testSaveWithPersistenceException() throws JSONException {
+        final IndexPolicy policy = newIndexPolicy();
+
+        EasyMock.expect(configRepository.saveIndexPolicy(DB_NAME, policy))
+                .andThrow(new PersistenceException("error"));
+
+        EasyMock.replay(repository);
+        EasyMock.replay(configRepository);
+
+        final String jsonOriginal = Converters.getInstance().getConverter(
+                IndexPolicy.class, JSONObject.class).convert(policy).toString();
+        Response response = service.saveIndexPolicy(DB_NAME, jsonOriginal
+                .toString());
+        verifyMock();
+
+        Assert.assertEquals(500, response.getStatus());
     }
 
     @Test

@@ -80,7 +80,7 @@ public class DocumentsDatabaseSearcher {
         root.addAppender(new ConsoleAppender(new PatternLayout(
                 PatternLayout.TTCC_CONVERSION_PATTERN)));
 
-        final String database = args.length > 0 ? args[0] : "database";
+        final String database = args.length > 0 ? args[0] : "data";
         final String keywords = args.length > 1 ? args[1] : "Pope";
 
         int startKey = 0;

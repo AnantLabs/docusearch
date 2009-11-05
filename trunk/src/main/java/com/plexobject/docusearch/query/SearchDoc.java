@@ -3,6 +3,7 @@ package com.plexobject.docusearch.query;
 import java.util.Map;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import com.plexobject.docusearch.domain.Document;
 
@@ -45,4 +46,12 @@ public class SearchDoc extends Document {
         return new EqualsBuilder().append(this.getId(), rhs.getId()).isEquals();
     }
 
+    /**
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(786529047, 1924536713).append(this.getId())
+                .toHashCode();
+    }
 }

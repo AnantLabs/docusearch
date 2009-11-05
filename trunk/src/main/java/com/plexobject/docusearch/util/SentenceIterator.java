@@ -2,17 +2,15 @@ package com.plexobject.docusearch.util;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.Reader;
 import java.text.BreakIterator;
 import java.util.Iterator;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import com.ibm.icu.text.RuleBasedBreakIterator;
 
 public class SentenceIterator implements Iterator<String> {
-    private final RuleBasedBreakIterator breakIterator;
+    private final BreakIterator breakIterator;
     private final String text;
     private int index;
 
@@ -26,12 +24,7 @@ public class SentenceIterator implements Iterator<String> {
 
     public SentenceIterator(final String text) throws IOException {
         this.text = text;
-        final InputStream in = getClass().getClassLoader().getResourceAsStream(
-                "sentence_break_rules.txt");
-        if (in == null) {
-            throw new IOException("Failed to find sentence_break_rules.txt");
-        }
-        this.breakIterator = new RuleBasedBreakIterator(IOUtils.toString(in));
+        this.breakIterator = BreakIterator.getSentenceInstance();
         this.breakIterator.setText(text);
     }
 

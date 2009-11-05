@@ -17,6 +17,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.plexobject.docusearch.Configuration;
 import com.plexobject.docusearch.docs.DocumentsDatabaseIndexer;
 import com.plexobject.docusearch.domain.Document;
 import com.plexobject.docusearch.domain.DocumentBuilder;
@@ -35,6 +36,7 @@ public class IndexServiceImplTest {
     private static final String PUBLICATIONS = "publications";
     private static final String COMPANIES = "test_companies";
     private static final String DB_NAME = "MYDB";
+    private static final int LIMIT = Configuration.getInstance().getPageSize();
 
     private static Logger LOGGER = Logger.getRootLogger();
 
@@ -63,7 +65,8 @@ public class IndexServiceImplTest {
 
     @Test
     public final void testCreate() {
-        EasyMock.expect(repository.getAllDocuments(COMPANIES, null, null))
+        EasyMock.expect(
+                repository.getAllDocuments(COMPANIES, null, null, LIMIT + 1))
                 .andReturn(newDocuments());
 
         EasyMock.expect(configRepository.getIndexPolicy(COMPANIES)).andReturn(
@@ -101,8 +104,8 @@ public class IndexServiceImplTest {
     @Test
     public final void testCreateSecondary() {
         EasyMock.expect(
-                repository.getAllDocuments(COMPANIES_PUBLICATIONS, null, null))
-                .andReturn(newDocuments());
+                repository.getAllDocuments(COMPANIES_PUBLICATIONS, null, null,
+                        LIMIT + 1)).andReturn(newDocuments());
 
         EasyMock.expect(repository.getDocument(PUBLICATIONS, "2")).andReturn(
                 newDocument());
@@ -151,8 +154,8 @@ public class IndexServiceImplTest {
     @Test
     public final void testUpdateSecondary() {
         EasyMock.expect(
-                repository.getAllDocuments(COMPANIES_PUBLICATIONS, null, null))
-                .andReturn(newDocuments());
+                repository.getAllDocuments(COMPANIES_PUBLICATIONS, null, null,
+                        LIMIT + 1)).andReturn(newDocuments());
         EasyMock.expect(repository.getDocument(PUBLICATIONS, "2")).andReturn(
                 newDocument());
         EasyMock.expect(
@@ -178,8 +181,8 @@ public class IndexServiceImplTest {
     @Test
     public final void testUpdateSecondaryNotFound() {
         EasyMock.expect(
-                repository.getAllDocuments(COMPANIES_PUBLICATIONS, null, null))
-                .andReturn(newDocuments());
+                repository.getAllDocuments(COMPANIES_PUBLICATIONS, null, null,
+                        LIMIT + 1)).andReturn(newDocuments());
 
         EasyMock.expect(
                 configRepository.getIndexPolicy(COMPANIES + PUBLICATIONS))

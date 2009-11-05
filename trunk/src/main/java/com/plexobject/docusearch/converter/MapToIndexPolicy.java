@@ -34,6 +34,10 @@ public class MapToIndexPolicy implements
             if (value.get(Constants.ANALYZER) != null) {
                 policy.setAnalyzer(value.get(Constants.ANALYZER).toString());
             }
+            if (value.get(Constants.ADD_TO_DICTIONARY) != null) {
+                policy.setAddToDictionary(Boolean.valueOf(value.get(
+                        Constants.ADD_TO_DICTIONARY).toString()));
+            }
             final List<Object> fields = (List<Object>) value
                     .get(Constants.FIELDS);
             if (fields != null) {

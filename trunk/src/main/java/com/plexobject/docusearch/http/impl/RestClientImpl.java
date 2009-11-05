@@ -22,7 +22,8 @@ import org.apache.log4j.Logger;
 import com.plexobject.docusearch.domain.Tuple;
 import com.plexobject.docusearch.http.RestClient;
 import com.plexobject.docusearch.http.RestException;
-
+import com.plexobject.docusearch.metrics.Metric;
+import com.plexobject.docusearch.metrics.Timer;
 
 /**
  * This class provides APIs to call remote Web service with JSON payload
@@ -55,10 +56,17 @@ public class RestClientImpl implements RestClient {
         }
     }
 
+    /*
+     * @see com.plexobject.docusearch.http.RestClient#get(java.lang.String)
+     */
     public Tuple get(final String path) throws IOException {
         return execute(new GetMethod(url(path)));
     }
 
+    /*
+     * @see com.plexobject.docusearch.http.RestClient#put(java.lang.String,
+     * java.lang.String)
+     */
     public Tuple put(final String path, final String body) throws IOException {
         final PutMethod method = new PutMethod(url(path));
         if (body != null) {
@@ -72,8 +80,12 @@ public class RestClientImpl implements RestClient {
         }
     }
 
+    /*
+     * @see com.plexobject.docusearch.http.RestClient#delete(java.lang.String)
+     */
     public int delete(final String path) throws IOException {
         final DeleteMethod method = new DeleteMethod(url(path));
+
         try {
             return httpClient.executeMethod(method);
         } finally {
@@ -85,6 +97,10 @@ public class RestClientImpl implements RestClient {
         return String.format("%s/%s", url, path);
     }
 
+    /*
+     * @see com.plexobject.docusearch.http.RestClient#post(java.lang.String,
+     * java.lang.String)
+     */
     public Tuple post(final String path, final String body) throws IOException {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Posting to " + path + ": " + body);
@@ -96,6 +112,7 @@ public class RestClientImpl implements RestClient {
     }
 
     private Tuple execute(final HttpMethodBase method) throws IOException {
+        final Timer timer = Metric.newTimer("RestClientImpl.execute");
         try {
             final int sc = httpClient.executeMethod(method);
             if (sc < OK_MIN || sc > OK_MAX) {
@@ -112,6 +129,7 @@ public class RestClientImpl implements RestClient {
             }
         } finally {
             method.releaseConnection();
+            timer.stop();
         }
     }
 }

@@ -30,6 +30,8 @@ import com.plexobject.docusearch.persistence.couchdb.DocumentRepositoryCouchdb;
  * 
  */
 public abstract class BaseRelationMerger implements Runnable {
+    private static final int LIMIT = Configuration.getInstance().getPageSize();
+
     protected static enum RelationType {
         ATOM, HASH, ARRAY
     }
@@ -211,7 +213,7 @@ public abstract class BaseRelationMerger implements Runnable {
                     + ".run");
 
             while ((sourceDocuments = repository.getAllDocuments(
-                    getSourceDatabase(), startKey, null)).size() > 0) {
+                    getSourceDatabase(), startKey, null, LIMIT)).size() > 0) {
                 if (logger.isDebugEnabled()) {
                     logger.debug("Got " + sourceDocuments.size()
                             + " for starting key " + startKey + ", limit "

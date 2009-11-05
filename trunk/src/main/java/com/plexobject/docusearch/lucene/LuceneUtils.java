@@ -102,6 +102,10 @@ public final class LuceneUtils {
 
     public static IndexWriter newWriter(final Directory dir,
             final String analyzer) throws IOException {
+        if (IndexWriter.isLocked(dir)) {
+            LOGGER.warn("***Unlocking " + dir + " directory for indexing");
+            IndexWriter.unlock(dir);
+        }
         final IndexWriter writer = new IndexWriter(
                 dir,
                 analyzer == null ? getDefaultAnalyzer() : getAnalyzer(analyzer),
@@ -125,11 +129,13 @@ public final class LuceneUtils {
     private static IndexWriter configWriter(final IndexWriter writer) {
         // Customize merge policy.
         final LogByteSizeMergePolicy mp = new LogByteSizeMergePolicy(writer);
-        mp.setMergeFactor(Integer.MAX_VALUE);
+        mp.setMergeFactor(10000);
         mp.setMaxMergeMB(1000);
         mp.setUseCompoundFile(false);
         writer.setMergePolicy(mp);
-
+        writer.setMaxBufferedDocs(10000);
+        writer.setMaxMergeDocs(10000);
+        writer.setMaxFieldLength(10000);
         writer.setRAMBufferSizeMB(RAM_BUF);
 
         if (LUCENE_DEBUG) {

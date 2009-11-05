@@ -24,12 +24,15 @@ public class ServiceJMXBeanImpl extends NotificationBroadcasterSupport
     private Map<String, String> properties = new ConcurrentHashMap<String, String>();
     private final String serviceName;
     private AtomicLong totalErrors;
+    private AtomicLong totalRequests;
+
     private AtomicLong sequenceNumber;
     private String state;
 
     public ServiceJMXBeanImpl(final String serviceName) {
         this.serviceName = serviceName;
         this.totalErrors = new AtomicLong();
+        this.totalRequests = new AtomicLong();
         this.sequenceNumber = new AtomicLong();
     }
 
@@ -115,7 +118,16 @@ public class ServiceJMXBeanImpl extends NotificationBroadcasterSupport
      */
     @Override
     public long getTotalRequests() {
-        return Metric.getMetric(getServiceName()).getTotalCalls();
+        return totalRequests.get();
+    }
+
+    public void incrementRequests() {
+        final long oldRequests = totalRequests.getAndIncrement();
+        final Notification notification = new AttributeChangeNotification(this,
+                sequenceNumber.incrementAndGet(), System.currentTimeMillis(),
+                "Requests changed", "Requests", "long", oldRequests,
+                oldRequests + 1);
+        sendNotification(notification);
     }
 
     @Override

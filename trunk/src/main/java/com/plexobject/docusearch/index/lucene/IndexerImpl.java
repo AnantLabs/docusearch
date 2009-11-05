@@ -2,10 +2,12 @@ package com.plexobject.docusearch.index.lucene;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -26,10 +28,13 @@ import org.codehaus.jettison.json.JSONObject;
 
 import com.plexobject.docusearch.converter.Converters;
 import com.plexobject.docusearch.domain.Document;
+import com.plexobject.docusearch.domain.Tuple;
 import com.plexobject.docusearch.index.IndexPolicy;
 import com.plexobject.docusearch.index.Indexer;
 import com.plexobject.docusearch.lucene.LuceneUtils;
 import com.plexobject.docusearch.lucene.analyzer.SimilarityHelper;
+import com.plexobject.docusearch.metrics.Metric;
+import com.plexobject.docusearch.metrics.Timer;
 
 /**
  * @author Shahzad Bhatti
@@ -37,10 +42,11 @@ import com.plexobject.docusearch.lucene.analyzer.SimilarityHelper;
  */
 public class IndexerImpl implements Indexer {
     private static final Logger LOGGER = Logger.getLogger(IndexerImpl.class);
-    private static final boolean OPTIMIZE = false;
+    private static final boolean OPTIMIZE = true;
     Pattern JSON_PATTERN = Pattern.compile("[,;:\\[\\]{}()\\s]+");
     private int numIndexed;
-    private final Map<String, Boolean> SKIP_FIELDS = new HashMap<String, Boolean>();
+    private final Map<String, Boolean> INDEXED_FIELDS = new HashMap<String, Boolean>();
+    private final ReentrantLock indexLock = new ReentrantLock();
     //
     private final String indexName;
 
@@ -56,58 +62,53 @@ public class IndexerImpl implements Indexer {
     }
 
     @Override
-    public int index(final IndexPolicy policy, final Collection<Document> docs,
-            final boolean deleteExisting) {
+    public int index(final IndexPolicy policy,
+            final Iterator<List<Document>> docsIt, final boolean deleteExisting) {
         IndexWriter writer = null;
         IndexReader reader = null;
+        IndexSearcher searcher = null;
 
+        final Timer timer = Metric.newTimer("IndexerImpl.index");
         int succeeded = 0;
         try {
-            writer = createWriter(policy);
-            reader = IndexReader.open(dir, false);
-            final IndexSearcher searcher = new IndexSearcher(reader);
+            indexLock.lock();
+            Tuple tuple = open(policy);
 
-            for (Document doc : docs) {
-                try {
-                    index(writer, policy, doc, searcher, deleteExisting);
-                    succeeded++;
-                } catch (final Exception e) {
-                    LOGGER.error("Error indexing " + doc, e);
+            writer = tuple.first();
+            reader = tuple.second();
+            searcher = tuple.third();
+            while (docsIt.hasNext()) {
+                List<Document> docs = docsIt.next();
+                for (Document doc : docs) {
+                    try {
+                        index(writer, policy, doc, searcher, deleteExisting);
+                        succeeded++;
+
+                        if (succeeded % 1000 == 0) {
+                            timer.lapse("--succeeded indexing " + succeeded
+                                    + " documents");
+                        }
+                    } catch (final Exception e) {
+                        LOGGER.error("Error indexing " + doc, e);
+                    }
                 }
             }
         } catch (final Exception e) {
             LOGGER.error("Error indexing documents", e);
         } finally {
-            if (writer != null) {
-                try {
-                    if (OPTIMIZE) {
-                        writer.optimize();
-                    }
-                } catch (Exception e) {
-                    LOGGER.error(e);
-                } finally {
-                    try {
-                        writer.close();
-                    } catch (Exception e) {
-                        LOGGER.error(e);
-                    }
-                }
-            }
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (Exception e) {
-                    LOGGER.error(e);
-                }
-            }
+            timer.stop("succeeded indexing " + succeeded
+                    + " documents with support of dictionary?"
+                    + policy.isAddToDictionary());
+            close(writer, reader);
             try {
                 if (policy.isAddToDictionary()) {
                     SimilarityHelper.getInstance().saveTrainingSpellChecker(
                             indexName);
                 }
             } catch (Exception e) {
-                LOGGER.error(e);
+                LOGGER.error("failed to add spellings", e);
             }
+            indexLock.unlock();
         }
         return succeeded;
     }
@@ -160,15 +161,24 @@ public class IndexerImpl implements Indexer {
             try {
                 IndexPolicy.Field field = policy.getField(name);
                 if (field == null) {
-                    if (!SKIP_FIELDS.containsKey(name)) {
-                        SKIP_FIELDS.put(name, Boolean.TRUE);
+                    if (!INDEXED_FIELDS.containsKey(name)) {
+                        INDEXED_FIELDS.put(name, Boolean.TRUE);
                         if (LOGGER.isInfoEnabled()) {
-                            LOGGER.info("Skipping indexing " + name + " for "
-                                    + indexName);
+                            LOGGER.info("Skipping indexing " + name
+                                    + " field for " + indexName + " from "
+                                    + doc.getDatabase());
                         }
                     }
 
                     continue; // skip field that are not specified in the policy
+                } else {
+                    if (!INDEXED_FIELDS.containsKey(name)) {
+                        INDEXED_FIELDS.put(name, Boolean.TRUE);
+                        if (LOGGER.isInfoEnabled()) {
+                            LOGGER.info("Will index " + name + " field for "
+                                    + indexName + " from " + doc.getDatabase());
+                        }
+                    }
                 }
                 final String value = getValue(json, name);
                 if (value != null) {
@@ -319,4 +329,36 @@ public class IndexerImpl implements Indexer {
         return value;
     }
 
+    private Tuple open(final IndexPolicy policy) throws IOException {
+        final IndexWriter writer = createWriter(policy);
+        final IndexReader reader = IndexReader.open(dir, false);
+        final IndexSearcher searcher = new IndexSearcher(reader);
+
+        return new Tuple(writer, reader, searcher);
+    }
+
+    private void close(final IndexWriter writer, final IndexReader reader) {
+        if (writer != null) {
+            try {
+                if (OPTIMIZE) {
+                    writer.optimize();
+                }
+            } catch (Exception e) {
+                LOGGER.error("failed to optimize", e);
+            } finally {
+                try {
+                    writer.close();
+                } catch (Exception e) {
+                    LOGGER.error("failed to close", e);
+                }
+            }
+        }
+        if (reader != null) {
+            try {
+                reader.close();
+            } catch (Exception e) {
+                LOGGER.error("failed to close reader", e);
+            }
+        }
+    }
 }

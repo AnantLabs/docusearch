@@ -133,7 +133,7 @@ public class Timer {
         final StringBuilder sb = new StringBuilder();
         Runtime runtime = Runtime.getRuntime();
         sb.append(", load: ").append(
-                String.format(".2f", ManagementFactory
+                String.format("%.2f", ManagementFactory
                         .getOperatingSystemMXBean().getSystemLoadAverage()));
         sb.append(", memory(M): ").append(runtime.freeMemory() / 1024 / 1024)
                 .append("/").append(runtime.totalMemory() / 1024 / 1024);

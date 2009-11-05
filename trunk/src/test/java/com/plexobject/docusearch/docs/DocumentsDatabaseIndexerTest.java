@@ -9,6 +9,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.plexobject.docusearch.Configuration;
 import com.plexobject.docusearch.domain.Document;
 import com.plexobject.docusearch.index.IndexPolicy;
 import com.plexobject.docusearch.persistence.ConfigurationRepository;
@@ -23,6 +24,8 @@ public class DocumentsDatabaseIndexerTest {
     private static final String COMPANY_ID = "company_id";
     private static final String COMPANIES_PUBLICATIONS = "companies_publications";
     private static final String PUBLICATIONS = "publications";
+    private static final int LIMIT = Configuration.getInstance().getPageSize();
+
     private DocumentRepository repository;
     private ConfigurationRepository configRepository;
     private DocumentsDatabaseIndexer indexer;
@@ -45,10 +48,13 @@ public class DocumentsDatabaseIndexerTest {
 
     @Test
     public final void testIndexAllDatabases() {
-
+        EasyMock.expect(configRepository.getIndexPolicy(DB_NAME)).andReturn(
+                new IndexPolicy());
         EasyMock.expect(repository.getAllDatabases()).andReturn(
                 new String[] { DB_NAME });
-
+        EasyMock.expect(
+                repository.getAllDocuments(DB_NAME, null, null, LIMIT + 1))
+                .andReturn(PagedList.<Document> emptyList());
         EasyMock.replay(repository);
         EasyMock.replay(configRepository);
 
@@ -60,7 +66,11 @@ public class DocumentsDatabaseIndexerTest {
 
     @Test
     public final void testIndexDatabases() {
-
+        EasyMock.expect(configRepository.getIndexPolicy(DB_NAME)).andReturn(
+                new IndexPolicy());
+        EasyMock.expect(
+                repository.getAllDocuments(DB_NAME, null, null, LIMIT + 1))
+                .andReturn(PagedList.<Document> emptyList());
         EasyMock.replay(repository);
         EasyMock.replay(configRepository);
 
@@ -74,7 +84,8 @@ public class DocumentsDatabaseIndexerTest {
     public final void testIndexDatabase() {
         EasyMock.expect(configRepository.getIndexPolicy(DB_NAME)).andReturn(
                 new IndexPolicy());
-        EasyMock.expect(repository.getAllDocuments(DB_NAME, null, null))
+        EasyMock.expect(
+                repository.getAllDocuments(DB_NAME, null, null, LIMIT + 1))
                 .andReturn(PagedList.<Document> emptyList());
 
         EasyMock.replay(repository);
@@ -91,8 +102,8 @@ public class DocumentsDatabaseIndexerTest {
                 configRepository.getIndexPolicy(DB_NAME + "_" + PUBLICATIONS))
                 .andReturn(new IndexPolicy());
         EasyMock.expect(
-                repository.getAllDocuments(COMPANIES_PUBLICATIONS, null, null))
-                .andReturn(PagedList.<Document> emptyList());
+                repository.getAllDocuments(COMPANIES_PUBLICATIONS, null, null,
+                        LIMIT + 1)).andReturn(PagedList.<Document> emptyList());
 
         EasyMock.replay(repository);
         EasyMock.replay(configRepository);
