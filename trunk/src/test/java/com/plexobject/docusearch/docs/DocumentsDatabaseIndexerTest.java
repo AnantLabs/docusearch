@@ -20,10 +20,10 @@ import com.plexobject.docusearch.persistence.RepositoryFactory;
 public class DocumentsDatabaseIndexerTest {
     private static Logger LOGGER = Logger.getRootLogger();
     private static final String DB_NAME = "MYDB";
-    private static final String PUBLICATION_ID = "publication_id";
-    private static final String COMPANY_ID = "company_id";
-    private static final String COMPANIES_PUBLICATIONS = "companies_publications";
-    private static final String PUBLICATIONS = "publications";
+    private static final String SECONDARY_ID = "secondary_id";
+    private static final String MASTER_ID = "master_id";
+    private static final String MASTER_SECONDARies = "master_secondaries";
+    private static final String SECONDARies = "secondaries";
     private static final int LIMIT = Configuration.getInstance().getPageSize();
 
     private DocumentRepository repository;
@@ -99,17 +99,17 @@ public class DocumentsDatabaseIndexerTest {
     @Test
     public final void testIndexSecondaryDatabase() {
         EasyMock.expect(
-                configRepository.getIndexPolicy(DB_NAME + "_" + PUBLICATIONS))
+                configRepository.getIndexPolicy(DB_NAME + "_" + SECONDARies))
                 .andReturn(new IndexPolicy());
         EasyMock.expect(
-                repository.getAllDocuments(COMPANIES_PUBLICATIONS, null, null,
+                repository.getAllDocuments(MASTER_SECONDARies, null, null,
                         LIMIT + 1)).andReturn(PagedList.<Document> emptyList());
 
         EasyMock.replay(repository);
         EasyMock.replay(configRepository);
 
-        indexer.indexUsingSecondaryDatabase(DB_NAME, PUBLICATIONS,
-                COMPANIES_PUBLICATIONS, COMPANY_ID, PUBLICATION_ID);
+        indexer.indexUsingSecondaryDatabase(DB_NAME, SECONDARies,
+                MASTER_SECONDARies, MASTER_ID, SECONDARY_ID);
         EasyMock.verify(repository);
         EasyMock.verify(configRepository);
     }
