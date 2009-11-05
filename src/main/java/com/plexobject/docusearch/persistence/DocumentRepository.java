@@ -74,12 +74,14 @@ public interface DocumentRepository {
      *            - starting sequence number
      * @param endKey
      *            - ending sequence number
+     * @param limit
+     *            - maximum number of documents to return
      * @return - list of documents
      * @throws PersistenceException
      *             is thrown when error occurs while reading the database.
      */
     public PagedList<Document> getAllDocuments(final String database,
-            final String startKey, final String endKey)
+            final String startKey, final String endKey, final int limit)
             throws PersistenceException;
 
     /**

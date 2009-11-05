@@ -73,11 +73,15 @@ public class RepositoryServiceImpl implements RepositoryService {
         try {
 
             docRepository.deleteDocument(database, id, version);
+            mbean.incrementRequests();
+
             return Response.ok().build();
         } catch (PersistenceException e) {
             LOGGER.error("failed to delete document " + database + "/" + id, e);
             mbean.incrementError();
-            return Response.status(e.getErrorCode()).type("text/plain").entity(
+            final int errorCode = e.getErrorCode() == 0 ? 500 : e
+                    .getErrorCode();
+            return Response.status(errorCode).type("text/plain").entity(
                     "failed to delete document " + database + "/" + id + "\n")
                     .build();
         } catch (Exception e) {
@@ -118,12 +122,17 @@ public class RepositoryServiceImpl implements RepositoryService {
             Document doc = docRepository.getDocument(database, id);
             JSONObject jsonDoc = Converters.getInstance().getConverter(
                     Object.class, JSONObject.class).convert(doc);
+            mbean.incrementRequests();
+
             return Response.ok(jsonDoc.toString()).build();
 
         } catch (PersistenceException e) {
             LOGGER.error("failed to find details for " + database + " with "
                     + id, e);
-            return Response.status(e.getErrorCode()).type("text/plain").entity(
+            final int errorCode = e.getErrorCode() == 0 ? 500 : e
+                    .getErrorCode();
+
+            return Response.status(errorCode).type("text/plain").entity(
                     "failed to get details for " + database + " with " + id
                             + "\n").build();
         } catch (Exception e) {
@@ -168,13 +177,17 @@ public class RepositoryServiceImpl implements RepositoryService {
             final Document savedDoc = docRepository.saveDocument(reqDoc);
             final JSONObject jsonRes = Converters.getInstance().getConverter(
                     Object.class, JSONObject.class).convert(savedDoc);
+            mbean.incrementRequests();
+
             return Response.status(RestClient.OK_CREATED).entity(
                     jsonRes.toString()).build();
         } catch (PersistenceException e) {
             LOGGER.error("failed to save " + body, e);
             mbean.incrementError();
+            final int errorCode = e.getErrorCode() == 0 ? 500 : e
+                    .getErrorCode();
 
-            return Response.status(e.getErrorCode()).type("text/plain").entity(
+            return Response.status(errorCode).type("text/plain").entity(
                     "failed to save " + body + "\n").build();
         } catch (Exception e) {
             LOGGER.error("failed to save " + body, e);
@@ -208,6 +221,7 @@ public class RepositoryServiceImpl implements RepositoryService {
             return Response.status(RestClient.CLIENT_ERROR_BAD_REQUEST).type(
                     "text/plain").entity("id not specified").build();
         }
+
         if (GenericValidator.isBlankOrNull(body)) {
             return Response.status(RestClient.CLIENT_ERROR_BAD_REQUEST).type(
                     "text/plain").entity("body not specified").build();
@@ -222,6 +236,8 @@ public class RepositoryServiceImpl implements RepositoryService {
             final Document savedDoc = docRepository.saveDocument(reqDoc);
             final JSONObject jsonRes = Converters.getInstance().getConverter(
                     Object.class, JSONObject.class).convert(savedDoc);
+            mbean.incrementRequests();
+
             if (version == null) {
                 return Response.status(RestClient.OK_CREATED).entity(
                         jsonRes.toString()).build();
@@ -231,8 +247,10 @@ public class RepositoryServiceImpl implements RepositoryService {
         } catch (PersistenceException e) {
             LOGGER.error("failed to save " + body, e);
             mbean.incrementError();
+            final int errorCode = e.getErrorCode() == 0 ? 500 : e
+                    .getErrorCode();
 
-            return Response.status(e.getErrorCode()).type("text/plain").entity(
+            return Response.status(errorCode).type("text/plain").entity(
                     "failed to save " + body + "\n").build();
         } catch (Exception e) {
             LOGGER.error("failed to save " + body, e);

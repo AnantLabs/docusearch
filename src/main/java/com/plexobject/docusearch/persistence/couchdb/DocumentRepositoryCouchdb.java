@@ -287,20 +287,23 @@ public class DocumentRepositoryCouchdb implements DocumentRepository {
      *            - starting sequence number
      * @param endKey
      *            - ending sequence number
+     * @param limit
+     *            - maximum number of documents to return
      * @return - list of documents
      * @throws PersistenceException
      *             is thrown when error occurs while reading the database.
      */
     @Override
     public PagedList<Document> getAllDocuments(final String database,
-            final String startKey, final String endKey)
+            final String startKey, final String endKey, final int max)
             throws PersistenceException {
         if (GenericValidator.isBlankOrNull(database)) {
             throw new IllegalArgumentException("database not specified");
         }
+        final int limit = Math.min(max, MAX_MAX_LIMIT);
         StringBuilder req = new StringBuilder();
         req.append(encode(database));
-        req.append("/_all_docs?limit=").append(MAX_MAX_LIMIT);
+        req.append("/_all_docs?limit=").append(limit);
         if (!GenericValidator.isBlankOrNull(startKey)) {
             req.append(String.format("&startkey=%%22%s%%22", encode(startKey)));
         }
@@ -309,8 +312,8 @@ public class DocumentRepositoryCouchdb implements DocumentRepository {
         }
         req.append("&include_docs=true");
         List<Document> docs = getAllDocuments(req.toString());
-        return new PagedList<Document>(docs, startKey, endKey, MAX_MAX_LIMIT,
-                docs.size() == MAX_MAX_LIMIT);
+        return new PagedList<Document>(docs, startKey, endKey, limit,
+                docs.size() == limit);
     }
 
     /**

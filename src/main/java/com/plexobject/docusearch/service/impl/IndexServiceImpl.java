@@ -71,6 +71,8 @@ public class IndexServiceImpl implements IndexService {
                 .newTimer("IndexServiceImpl.createIndexUsingPrimaryDatabase");
         try {
             documentsDatabaseIndexer.indexUsingPrimaryDatabase(index);
+            mbean.incrementRequests();
+
             return Response.status(RestClient.OK_CREATED).entity(
                     "rebuilt index for " + index + " using primary database\n")
                     .build();
@@ -135,6 +137,8 @@ public class IndexServiceImpl implements IndexService {
             documentsDatabaseIndexer.indexUsingSecondaryDatabase(index,
                     sourceDatabase, joinDatabase, indexIdInJoinDatabase,
                     sourceIdInJoinDatabase);
+            mbean.incrementRequests();
+
             return Response.status(RestClient.OK_CREATED).entity(
                     "rebuilt index for " + index + " using secondary database "
                             + sourceDatabase + "\n").build();
@@ -186,6 +190,8 @@ public class IndexServiceImpl implements IndexService {
         try {
             int succeeded = documentsDatabaseIndexer
                     .updateIndexUsingPrimaryDatabase(index, ids);
+            mbean.incrementRequests();
+
             return Response.ok().entity(
                     "updated " + succeeded + " documents in index for " + index
                             + " with ids " + docIds + "\n").build();
@@ -265,6 +271,8 @@ public class IndexServiceImpl implements IndexService {
                     .updateIndexUsingSecondaryDatabase(index, sourceDatabase,
                             joinDatabase, indexIdInJoinDatabase,
                             sourceIdInJoinDatabase, ids);
+            mbean.incrementRequests();
+
             return Response.ok().entity(
                     "updated " + succeeded + " documents in index for " + index
                             + " with ids " + docIds + "\n").build();

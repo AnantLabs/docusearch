@@ -70,11 +70,14 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             final JSONObject jsonPolicy = Converters.getInstance()
                     .getConverter(IndexPolicy.class, JSONObject.class).convert(
                             policy);
+            mbean.incrementRequests();
             return Response.ok(jsonPolicy.toString()).build();
         } catch (PersistenceException e) {
             LOGGER.error("failed to get index policy for " + index, e);
             mbean.incrementError();
-            return Response.status(e.getErrorCode()).type("text/plain").entity(
+            final int errorCode = e.getErrorCode() == 0 ? 500 : e
+                    .getErrorCode();
+            return Response.status(errorCode).type("text/plain").entity(
                     "failed to get index policy for " + index + "\n").build();
         } catch (Exception e) {
             LOGGER.error("failed to get index policy for " + index, e);
@@ -107,11 +110,15 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             final JSONObject jsonPolicy = Converters.getInstance()
                     .getConverter(QueryPolicy.class, JSONObject.class).convert(
                             policy);
+            mbean.incrementRequests();
+
             return Response.ok(jsonPolicy.toString()).build();
         } catch (PersistenceException e) {
             LOGGER.error("failed to get index policy for " + index, e);
             mbean.incrementError();
-            return Response.status(e.getErrorCode()).type("text/plain").entity(
+            final int errorCode = e.getErrorCode() == 0 ? 500 : e
+                    .getErrorCode();
+            return Response.status(errorCode).type("text/plain").entity(
                     "failed to get index policy for " + index + "\n").build();
         } catch (Exception e) {
             LOGGER.error("failed to get index policy for " + index, e);
@@ -152,12 +159,16 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                     index, policy);
             final JSONObject jsonRes = Converters.getInstance().getConverter(
                     IndexPolicy.class, JSONObject.class).convert(savedPolicy);
+            mbean.incrementRequests();
+
             return Response.status(RestClient.OK_CREATED).entity(
                     jsonRes.toString()).build();
         } catch (PersistenceException e) {
             LOGGER.error("failed to save index policy for " + jsonPolicy, e);
             mbean.incrementError();
-            return Response.status(e.getErrorCode()).type("text/plain").entity(
+            final int errorCode = e.getErrorCode() == 0 ? 500 : e
+                    .getErrorCode();
+            return Response.status(errorCode).type("text/plain").entity(
                     "failed to save index policy for " + jsonPolicy + "\n")
                     .build();
         } catch (Exception e) {
@@ -200,12 +211,16 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                     index, policy);
             final JSONObject jsonRes = Converters.getInstance().getConverter(
                     QueryPolicy.class, JSONObject.class).convert(savedPolicy);
+            mbean.incrementRequests();
+
             return Response.status(RestClient.OK_CREATED).entity(
                     jsonRes.toString()).build();
         } catch (PersistenceException e) {
             LOGGER.error("failed to save query policy for " + jsonPolicy, e);
             mbean.incrementError();
-            return Response.status(e.getErrorCode()).type("text/plain").entity(
+            final int errorCode = e.getErrorCode() == 0 ? 500 : e
+                    .getErrorCode();
+            return Response.status(errorCode).type("text/plain").entity(
                     "failed to save query policy for " + jsonPolicy + "\n")
                     .build();
         } catch (Exception e) {

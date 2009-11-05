@@ -6,6 +6,7 @@ import java.io.Reader;
 import java.util.Arrays;
 import java.util.Properties;
 
+import org.apache.log4j.Logger;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.LowerCaseFilter;
 import org.apache.lucene.analysis.StopFilter;
@@ -16,9 +17,9 @@ import org.apache.lucene.analysis.standard.StandardTokenizer;
 import org.apache.solr.analysis.SynonymFilter;
 import org.apache.solr.analysis.SynonymMap;
 
-import com.plexobject.docusearch.lucene.LuceneUtils;
 
 public class SynonymAnalyzer extends Analyzer {
+    private static Logger LOGGER = Logger.getLogger(SynonymAnalyzer.class);
     private static final String SYNONYMS_DATA = "synonyms.properties";
     final SynonymMap synonymMap;
 
@@ -53,15 +54,23 @@ public class SynonymAnalyzer extends Analyzer {
             } catch (IOException e) {
                 throw new RuntimeException("Failed to load " + SYNONYMS_DATA, e);
             }
+            for (String name : synDefs.stringPropertyNames()) {
+                final String replacement = name.trim();
+                final String match = synDefs.getProperty(name).trim();
+                final boolean orig = false;
+                final boolean merge = true;
+                synMap.add(Arrays.asList(match), SynonymMap.makeTokens(Arrays
+                        .asList(replacement)), orig, merge);
+            }
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("Added " + synDefs.size() + " synonyms");
+            }
+        } else {
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("Could not find " + SYNONYMS_DATA);
+            }
         }
-        for (String name : synDefs.stringPropertyNames()) {
-            final String replacement = name.trim();
-            final String match = synDefs.getProperty(name).trim();
-            final boolean orig = false;
-            final boolean merge = true;
-            synMap.add(Arrays.asList(match), LuceneUtils.tokens(replacement),
-                    orig, merge);
-        }
+
         return synMap;
     }
 }

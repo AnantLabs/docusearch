@@ -176,8 +176,9 @@ public class IndexPolicy {
     @Override
     public String toString() {
         return new ToStringBuilder(this).append("score", this.score).append(
-                "boost", boost).append("fields", fields).append("analyzer",
-                this.analyzer).toString();
+                "boost", boost).append("addToDictionary", this.addToDictionary)
+                .append("analyzer", this.analyzer).append("fields", fields)
+                .toString();
     }
 
 }

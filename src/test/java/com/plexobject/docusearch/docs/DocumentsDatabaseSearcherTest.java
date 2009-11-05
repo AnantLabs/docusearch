@@ -1,7 +1,6 @@
 package com.plexobject.docusearch.docs;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,6 +24,7 @@ import com.plexobject.docusearch.lucene.LuceneUtils;
 import com.plexobject.docusearch.persistence.ConfigurationRepository;
 import com.plexobject.docusearch.persistence.DocumentRepository;
 import com.plexobject.docusearch.persistence.RepositoryFactory;
+import com.plexobject.docusearch.persistence.SimpleDocumentsIterator;
 import com.plexobject.docusearch.query.QueryPolicy;
 
 public class DocumentsDatabaseSearcherTest {
@@ -111,7 +111,8 @@ public class DocumentsDatabaseSearcherTest {
         policy.setScore(score);
         final IndexerImpl indexer = new IndexerImpl(new File(
                 LuceneUtils.INDEX_DIR, DB_NAME));
-        return indexer.index(policy, Arrays.asList(doc), deleteExisting);
+        return indexer.index(policy, new SimpleDocumentsIterator(doc),
+                deleteExisting);
     }
 
     private static QueryPolicy newQueryPolicy() {

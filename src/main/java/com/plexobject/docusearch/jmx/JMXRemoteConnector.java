@@ -16,7 +16,6 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.log4j.Logger;
 
 import com.plexobject.docusearch.Configuration;
-import com.plexobject.docusearch.domain.Document;
 
 public class JMXRemoteConnector implements Closeable {
     private static final Logger LOGGER = Logger.getLogger(JMXRegistrar.class);
@@ -86,7 +85,7 @@ public class JMXRemoteConnector implements Closeable {
      */
     @Override
     public boolean equals(Object object) {
-        if (!(object instanceof Document)) {
+        if (!(object instanceof JMXRemoteConnector)) {
             return false;
         }
         JMXRemoteConnector rhs = (JMXRemoteConnector) object;

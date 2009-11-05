@@ -14,4 +14,5 @@ public interface Constants {
     public static final String FUZZY_MATCH = "fuzzyMatch";
     public static final String VALUE = "value";
     public static final String FREQUENCY = "frequency";
+    public static final String ADD_TO_DICTIONARY = "addToDictionary";
 }

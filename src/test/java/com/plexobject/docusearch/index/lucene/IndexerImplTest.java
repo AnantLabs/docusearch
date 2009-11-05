@@ -3,7 +3,6 @@
  */
 package com.plexobject.docusearch.index.lucene;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -26,6 +25,7 @@ import com.plexobject.docusearch.lucene.analyzer.DiacriticAnalyzer;
 import com.plexobject.docusearch.lucene.analyzer.MetaphoneReplacementAnalyzer;
 import com.plexobject.docusearch.lucene.analyzer.PorterAnalyzer;
 import com.plexobject.docusearch.lucene.analyzer.SynonymAnalyzer;
+import com.plexobject.docusearch.persistence.SimpleDocumentsIterator;
 import com.plexobject.docusearch.query.QueryCriteria;
 import com.plexobject.docusearch.query.QueryPolicy;
 import com.plexobject.docusearch.query.RankedTerm;
@@ -65,6 +65,8 @@ public class IndexerImplTest {
         Analyzer saved = LuceneUtils.getDefaultAnalyzer();
         query(new MetaphoneReplacementAnalyzer());
         query(new SynonymAnalyzer(new SynonymMap()));
+
+        // query(new POSAnalyzer());
         query(new PorterAnalyzer());
         query(new DiacriticAnalyzer());
         LuceneUtils.setDefaultAnalyzer(saved);
@@ -190,6 +192,7 @@ public class IndexerImplTest {
         final Document doc = new DocumentBuilder(DB_NAME).putAll(attrs).setId(
                 id).setRevision("REV").build();
         final IndexPolicy policy = new IndexPolicy();
+        policy.setAddToDictionary(true);
         if (indexFields == null) {
             for (int i = 0; i < fields.length - 1; i += 2) {
                 policy.add(fields[i]);
@@ -201,7 +204,8 @@ public class IndexerImplTest {
         }
         policy.setScore(score);
         final IndexerImpl indexer = new IndexerImpl(ram, DB_NAME);
-        return indexer.index(policy, Arrays.asList(doc), deleteExisting);
+        return indexer.index(policy, new SimpleDocumentsIterator(doc),
+                deleteExisting);
     }
 
     private static QueryPolicy newQueryPolicy() {

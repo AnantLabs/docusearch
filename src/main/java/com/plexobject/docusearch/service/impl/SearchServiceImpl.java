@@ -108,18 +108,24 @@ public class SearchServiceImpl implements SearchService {
                     docs.put(jsonDoc);
                 }
             }
+            JSONArray similar = new JSONArray();
+            for (String word : results.getSimilarWords()) {
+                similar.put(word);
+            }
             final JSONObject response = new JSONObject();
+            response.put("suggestions", similar);
             response.put("keywords", keywords);
             response.put("start", start);
             response.put("limit", limit);
             response.put("totalHits", results.getTotalHits());
             response.put("docs", docs);
 
-            timer
-                    .stop("Found " + results.getTotalHits() + " hits for "
-                            + keywords + " on index " + index + ", detailed "
-                            + detailedResults + ", start " + start + ", limit "
-                            + limit);
+            timer.stop("Found " + results.getTotalHits() + " hits for "
+                    + keywords + " on index " + index + ", detailed "
+                    + detailedResults + ", start " + start + ", limit " + limit
+                    + ", suggestions " + includeSuggestions + "-->" + similar);
+            mbean.incrementRequests();
+
             return Response.ok(response.toString()).build();
 
         } catch (Exception e) {
@@ -189,7 +195,10 @@ public class SearchServiceImpl implements SearchService {
 
             timer.stop("Found " + results.getTotalHits() + " hits for " + docId
                     + " on index " + index + ", detailed " + detailedResults
-                    + ", start " + start + ", limit " + limit);
+                    + ", start " + start + ", limit " + limit + ", json "
+                    + response);
+            mbean.incrementRequests();
+
             return Response.ok(response.toString()).build();
 
         } catch (Exception e) {
@@ -249,6 +258,8 @@ public class SearchServiceImpl implements SearchService {
 
             timer.stop("Explanationfor " + keywords + " on index " + index
                     + ", start " + start + ", limit " + limit);
+            mbean.incrementRequests();
+
             return Response.ok(response.toString()).build();
 
         } catch (Exception e) {
@@ -306,6 +317,8 @@ public class SearchServiceImpl implements SearchService {
             }
 
             timer.stop();
+            mbean.incrementRequests();
+
             return Response.ok(response.toString()).build();
 
         } catch (Exception e) {
