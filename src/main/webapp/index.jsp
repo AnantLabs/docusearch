@@ -156,9 +156,9 @@
 													textToInsert += '<tr>\n';
 													for ( var i = 0; i < propertyNames.length; i++) {
 														if (propertyNames[i] == '_id') {
-															textToInsert += '<td><a href="#" onclick="show(''' + this[propertyNames[i]] + ''');">details</a></td>';
+															textToInsert += '<td><a href="#" onclick="show("' + this[propertyNames[i]] + '");">details</a></td>';
 														} else if (propertyNames[i] == 'doc') {
-															textToInsert += '<td><a href="#" onclick="similar(''' + this['_id'] + ',' +  this[propertyNames[i]] + ''');">more like this</a></td>\n';
+															textToInsert += '<td><a href="#" onclick="similar("' + this['_id'] + ',' +  this[propertyNames[i]] + '");">more like this</a></td>\n';
 														} else if (this[propertyNames[i]].constructor.toString().indexOf("Array") != -1) {
 															textToInsert += '<td>';
 															for (var j=0; j<3 && j<this[propertyNames[i]].length; j++) {
