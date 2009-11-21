@@ -2,21 +2,21 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
-	<head>
-		<meta http-equiv="expire" content="0" />
-		<title>DocuSearch</title>
-		<script src="http://code.jquery.com/jquery-latest.js"></script>
-		<link rel="stylesheet"
-			href="http://dev.jquery.com/view/trunk/plugins/autocomplete/jquery.autocomplete.css"
-			type="text/css" />
-		<script type="text/javascript"
-			src="http://dev.jquery.com/view/trunk/plugins/autocomplete/lib/jquery.bgiframe.min.js"></script>
-		<script type="text/javascript"
-			src="http://dev.jquery.com/view/trunk/plugins/autocomplete/lib/jquery.dimensions.js"></script>
-		<script type="text/javascript"
-			src="http://dev.jquery.com/view/trunk/plugins/autocomplete/jquery.autocomplete.js"></script>
+<head>
+<meta http-equiv="expire" content="0" />
+<title>DocuSearch</title>
+<script src="http://code.jquery.com/jquery-latest.js"></script>
+<link rel="stylesheet"
+	href="http://dev.jquery.com/view/trunk/plugins/autocomplete/jquery.autocomplete.css"
+	type="text/css" />
+<script type="text/javascript"
+	src="http://dev.jquery.com/view/trunk/plugins/autocomplete/lib/jquery.bgiframe.min.js"></script>
+<script type="text/javascript"
+	src="http://dev.jquery.com/view/trunk/plugins/autocomplete/lib/jquery.dimensions.js"></script>
+<script type="text/javascript"
+	src="http://dev.jquery.com/view/trunk/plugins/autocomplete/jquery.autocomplete.js"></script>
 
-		<script type="text/javascript">
+<script type="text/javascript">
 		$(document).ready( function() {
 			$('#ajax_loading').hide();
 			$(".search-cls").click( function() {
@@ -156,9 +156,9 @@
 													textToInsert += '<tr>\n';
 													for ( var i = 0; i < propertyNames.length; i++) {
 														if (propertyNames[i] == '_id') {
-															textToInsert += '<td><a href="#" onclick="show("' + this[propertyNames[i]] + '");">details</a></td>';
+															textToInsert += '<td><a href="#" onclick="show(\'' + this[propertyNames[i]] + '\');">details</a></td>';
 														} else if (propertyNames[i] == 'doc') {
-															textToInsert += '<td><a href="#" onclick="similar("' + this['_id'] + ',' +  this[propertyNames[i]] + '");">more like this</a></td>\n';
+															textToInsert += '<td><a href="#" onclick="similar(\'' + this['_id'] + '\',\'' +  this[propertyNames[i]] + '\');">more like this</a></td>\n';
 														} else if (this[propertyNames[i]].constructor.toString().indexOf("Array") != -1) {
 															textToInsert += '<td>';
 															for (var j=0; j<3 && j<this[propertyNames[i]].length; j++) {
@@ -248,15 +248,11 @@
 		});
 	}
 </script>
-	</head>
-	<body>
-		<form id="search_form" onsubmit="return false;">
-			<fieldset>
-				<label for="keywords">
-					Keywords:
-				</label>
-				<input type="text" id="keywords" class="kw" name="keywords" />
-<!--
+</head>
+<body>
+<form id="search_form" onsubmit="return false;">
+<fieldset><label for="keywords"> Keywords: </label> <input
+	type="text" id="keywords" class="kw" name="keywords" /> <!--
 				<label for="zipCode">
 					Zip Code (Geo Search):
 				</label>
@@ -283,37 +279,28 @@
 						200 Miles
 					</option>
 				</select>
--->
-				<input type="button" id="search" name="search" class="search-cls"
-					value="Search" />
-				<input type="button" id="explain" name="explain" class="explain-cls"
-					value="Explain" />
-				<input type="button" id="top" name="top" class="top-cls"
-					value="Top Terms" />
-				<div id="ajax_loading">
-					<img align="absmiddle" src="images/ajax-loader.gif" />
-					&nbsp;Processing...
-				</div>
-			</fieldset>
-		</form>
-		<table>
-			<tr>
-				<td valign="top" width="100%" colspan="2">
-					Suggestions:
-					<div id="suggestions">
-					</div>
-				</td>
-			</tr>
-			<tr>
-				<td valign="top" width="50%">
-					<div id="summary">
-					</div>
-				</td>
-				<td valign="top" width="50%">
-					<div id="details">
-					</div>
-				</td>
-			</tr>
-		</table>
-	</body>
+--> <input type="button" id="search" name="search" class="search-cls"
+	value="Search" /> <input type="button" id="explain" name="explain"
+	class="explain-cls" value="Explain" /> <input type="button" id="top"
+	name="top" class="top-cls" value="Top Terms" />
+<div id="ajax_loading"><img align="absmiddle"
+	src="images/ajax-loader.gif" /> &nbsp;Processing...</div>
+</fieldset>
+</form>
+<table>
+	<tr>
+		<td valign="top" width="100%" colspan="2">Suggestions:
+		<div id="suggestions"></div>
+		</td>
+	</tr>
+	<tr>
+		<td valign="top" width="50%">
+		<div id="summary"></div>
+		</td>
+		<td valign="top" width="50%">
+		<div id="details"></div>
+		</td>
+	</tr>
+</table>
+</body>
 </html>
