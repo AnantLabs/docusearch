@@ -96,10 +96,13 @@ public class SearchServiceImpl implements SearchService {
 
             SearchDocList results = query.search(criteria, policy,
                     includeSuggestions, start, limit);
+
             JSONArray docs = docsToJson(index, detailedResults, results);
             JSONArray similar = new JSONArray();
-            for (String word : results.getSimilarWords()) {
-                similar.put(word);
+            if (results.getSimilarWords() != null) {
+                for (String word : results.getSimilarWords()) {
+                    similar.put(word);
+                }
             }
             final JSONObject response = new JSONObject();
             response.put("suggestions", similar);
