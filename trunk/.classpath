@@ -9,6 +9,7 @@
   <classpathentry kind="var" path="M2_REPO/javax/annotation/jsr250-api/1.0/jsr250-api-1.0.jar"/>
   <classpathentry kind="var" path="M2_REPO/javax/ws/rs/jsr311-api/1.1/jsr311-api-1.1.jar"/>
   <classpathentry kind="var" path="M2_REPO/javax/servlet/jstl/1.1.2/jstl-1.1.2.jar"/>
+  <classpathentry kind="var" path="M2_REPO/javax/servlet/servlet-api/2.5/servlet-api-2.5.jar"/>
   <classpathentry kind="var" path="M2_REPO/javax/xml/stream/stax-api/1.0-2/stax-api-1.0-2.jar"/>
   <classpathentry kind="var" path="M2_REPO/org/apache/activemq/activeio-core/3.1.2/activeio-core-3.1.2.jar"/>
   <classpathentry kind="var" path="M2_REPO/org/apache/activemq/activemq-camel/5.3.0/activemq-camel-5.3.0.jar"/>
@@ -103,6 +104,7 @@
   <classpathentry kind="var" path="M2_REPO/org/springframework/spring-webmvc/2.5.6/spring-webmvc-2.5.6.jar"/>
   <classpathentry kind="var" path="M2_REPO/taglibs/standard/1.1.2/standard-1.1.2.jar"/>
   <classpathentry kind="var" path="M2_REPO/stax/stax-api/1.0.1/stax-api-1.0.1.jar"/>
+  <classpathentry kind="var" path="M2_REPO/tidy/tidy/r938/tidy-r938.jar"/>
   <classpathentry kind="var" path="M2_REPO/org/apache/tika/tika/0.3/tika-0.3.jar"/>
   <classpathentry kind="var" path="M2_REPO/org/apache/xbean/xbean-spring/3.6/xbean-spring-3.6.jar"/>
   <classpathentry kind="var" path="M2_REPO/xerces/xercesImpl/2.8.1/xercesImpl-2.8.1.jar"/>

@@ -6,6 +6,7 @@ import java.util.TreeMap;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.validator.GenericValidator;
 
 public class QueryCriteria {
     public static final String KEYWORDS = "keywords";
@@ -14,11 +15,19 @@ public class QueryCriteria {
     public static final String INDEX_DATE_BEGIN = "indexDateBegin";
     public static final String INDEX_DATE_END = "indexDateEnd";
     public static final String SCORE_QUERY = "scoreQuery";
+
     public static final String LATITUDE = "latitude";
     public static final String LONGITUDE = "longitude";
     public static final String ZIPCODE = "zipCode";
+    public static final String CITY = "city";
+    public static final String STATE = "state";
+    public static final String COUNTRY = "country";
+    public static final String REGION = "region";
     public static final String RADIUS = "radius";
     public static final String OWNER = "owner";
+    public static final String SORT_BY = "sortBy";
+    public static final String ASCENDING_SORT = "ascendingSort";
+
     public static final String FUZZY_SEARCH_FOR_NO_RESULTS = "fuzzySearchForNoResults";
 
     final Map<String, String> options = new TreeMap<String, String>();
@@ -28,7 +37,7 @@ public class QueryCriteria {
     }
 
     public boolean isScoreQuery() {
-        return options.get(SCORE_QUERY) != null;
+        return has(SCORE_QUERY);
     }
 
     public String getOwner() {
@@ -36,7 +45,7 @@ public class QueryCriteria {
     }
 
     public boolean hasOwner() {
-        return options.get(OWNER) != null;
+        return has(OWNER);
     }
 
     public String getKeywords() {
@@ -44,7 +53,7 @@ public class QueryCriteria {
     }
 
     public boolean hasKeywords() {
-        return options.get(KEYWORDS) != null;
+        return has(KEYWORDS);
     }
 
     public int getRecencyMaxDays() {
@@ -56,13 +65,11 @@ public class QueryCriteria {
     }
 
     public boolean hasRecency() {
-        return options.get(RECENCY_MAX_DAYS) != null
-                && options.get(RECENCY_MULTIPLIER) != null;
+        return has(RECENCY_MAX_DAYS) && has(RECENCY_MULTIPLIER);
     }
 
     public boolean hasIndexDateRange() {
-        return options.get(INDEX_DATE_BEGIN) != null
-                && options.get(INDEX_DATE_END) != null;
+        return has(INDEX_DATE_BEGIN) && has(INDEX_DATE_END);
 
     }
 
@@ -74,12 +81,24 @@ public class QueryCriteria {
         return options.get(INDEX_DATE_END);
     }
 
+    public boolean hasSortBy() {
+        return has(SORT_BY);
+    }
+
+    public boolean isAscendingSort() {
+        return String.valueOf(Boolean.TRUE).equals(options.get(ASCENDING_SORT));
+    }
+
+    public String getSortBy() {
+        return options.get(SORT_BY);
+    }
+
     public double getLatitude() {
         return getDouble(LATITUDE);
     }
 
     public boolean hasLatitude() {
-        return options.get(LATITUDE) != null;
+        return has(LATITUDE);
     }
 
     public double getLongitude() {
@@ -87,7 +106,7 @@ public class QueryCriteria {
     }
 
     public boolean hasLongitude() {
-        return options.get(LONGITUDE) != null;
+        return has(LONGITUDE);
     }
 
     public String getZipcode() {
@@ -95,7 +114,39 @@ public class QueryCriteria {
     }
 
     public boolean hasZipcode() {
-        return options.get(ZIPCODE) != null;
+        return has(ZIPCODE);
+    }
+
+    public String getCity() {
+        return options.get(CITY);
+    }
+
+    public boolean hasCity() {
+        return has(CITY);
+    }
+
+    public String getState() {
+        return options.get(STATE);
+    }
+
+    public boolean hasState() {
+        return has(STATE);
+    }
+
+    public String getCountry() {
+        return options.get(COUNTRY);
+    }
+
+    public boolean hasCountry() {
+        return has(COUNTRY);
+    }
+
+    public String getRegion() {
+        return options.get(REGION);
+    }
+
+    public boolean hasRegion() {
+        return has(REGION);
     }
 
     private int getInteger(final String key) {
@@ -108,17 +159,21 @@ public class QueryCriteria {
     }
 
     public boolean hasRadius() {
-        return options.get(RADIUS) != null;
+        return has(RADIUS);
     }
 
     public boolean isSpatialQuery() {
-        return ((hasLongitude() && hasLatitude()) || hasZipcode())
-                && hasRadius();
+        return hasLongitude() && hasLatitude() && hasRadius();
+    }
+
+    public boolean isGeoQuery() {
+        return hasZipcode() || hasCity() || hasState() || hasCountry()
+                || hasRegion();
     }
 
     public boolean isFuzzySearchForNoResults() {
-        return options.get(FUZZY_SEARCH_FOR_NO_RESULTS) == String
-                .valueOf(Boolean.TRUE);
+        return String.valueOf(Boolean.TRUE).equals(
+                options.get(FUZZY_SEARCH_FOR_NO_RESULTS));
     }
 
     private double getDouble(final String key) {
@@ -152,8 +207,13 @@ public class QueryCriteria {
      */
     @Override
     public String toString() {
-        return new ToStringBuilder(this).append("options", this.options)
+        return new ToStringBuilder(this).append("geo", isGeoQuery()).append(
+                "spatial", isSpatialQuery()).append("options", this.options)
                 .toString();
+    }
+
+    private boolean has(String property) {
+        return !GenericValidator.isBlankOrNull(options.get(property));
     }
 
 }
