@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.TreeMap;
 import java.util.List;
 import java.util.Map;
 
@@ -47,7 +47,7 @@ public class DocumentRepositoryBdb implements DocumentRepository {
     private final boolean readOnly;
     private Environment env;
     private Map<String, Database> databases = Collections
-            .synchronizedMap(new HashMap<String, Database>());
+            .synchronizedMap(new TreeMap<String, Database>());
 
     public DocumentRepositoryBdb(final File envDir, final boolean readOnly) {
         this.envDir = envDir;
@@ -197,8 +197,7 @@ public class DocumentRepositoryBdb implements DocumentRepository {
             int numRecords = 0;
             OperationStatus ostat = null;
 
-            while ((ostat == OperationStatus.SUCCESS)
-                    && (numRecords < limit)) {
+            while ((ostat == OperationStatus.SUCCESS) && (numRecords < limit)) {
                 final Document doc = docBinding.entryToObject(dbData);
                 documents.add(doc);
 
@@ -312,7 +311,8 @@ public class DocumentRepositoryBdb implements DocumentRepository {
      * .plexobject.docusearch.domain.Document)
      */
     @Override
-    public Document saveDocument(Document document, boolean overwrite) throws PersistenceException {
+    public Document saveDocument(Document document, boolean overwrite)
+            throws PersistenceException {
         if (document == null) {
             throw new NullPointerException("document not specified");
         }
