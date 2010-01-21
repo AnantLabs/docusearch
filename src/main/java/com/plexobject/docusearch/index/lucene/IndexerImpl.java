@@ -334,7 +334,7 @@ public class IndexerImpl implements Indexer {
                     } else if (value.length() > 0 && field.htmlToText) {
                         value = htmlToTextConverter.convert(value);
                     }
-
+                    value = value.toLowerCase();
                     final String storeAs = field.storeAs != null
                             && field.storeAs.length() > 0 ? field.storeAs : doc
                             .getDatabase()
