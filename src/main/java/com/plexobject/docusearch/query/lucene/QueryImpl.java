@@ -76,8 +76,8 @@ public class QueryImpl implements Query {
     }
 
     private final Directory dir;
-    private final IndexReader reader;
-    private final IndexSearcher searcher;
+    private IndexReader reader;
+    private IndexSearcher searcher;
     private final String index;
 
     private Map<LookupPolicy, QueryImpl> lookupQueries = new CachedMap<LookupPolicy, QueryImpl>();
@@ -258,15 +258,6 @@ public class QueryImpl implements Query {
         } catch (IOException e) {
             throw new SearchException("failed to moreLikeThis " + luceneId, e);
         } finally {
-            if (searcher != null) {
-                try {
-                    searcher.close();
-                } catch (CorruptIndexException e) {
-                    LOGGER.error(e);
-                } catch (IOException e) {
-                    LOGGER.error(e);
-                }
-            }
             timer.stop();
         }
     }
@@ -368,7 +359,8 @@ public class QueryImpl implements Query {
             filters.add(distanceQueryBuilder.getFilter());
         }
         //
-        if (!criteria.hasKeywords() && !criteria.isScoreQuery()) {
+        if (!criteria.hasKeywords() && !criteria.isScoreQuery()
+                && !criteria.isAlways()) {
             return new Tuple(0, new double[0][], similarWords, explanations,
                     distanceQueryBuilder);
         }
@@ -377,12 +369,15 @@ public class QueryImpl implements Query {
                 .getAnalyzer());
 
         try {
-            org.apache.lucene.search.Query q = criteria.isScoreQuery() ? QueryUtils
-                    .createQuery(QueryType.HIT, null)
-                    : QueryUtils.keywordsQuery(analyzer, index, criteria
-                            .getKeywords(), queryPolicy, similarWords,
-                            queryType);
-
+            org.apache.lucene.search.Query q = null;
+            if (criteria.isScoreQuery()) {
+                q = QueryUtils.createQuery(QueryType.HIT, null);
+            } else if (criteria.isAlways()) {
+                q = QueryUtils.alwaysQuery();
+            } else {
+                q = QueryUtils.keywordsQuery(analyzer, index, criteria
+                        .getKeywords(), queryPolicy, similarWords, queryType);
+            }
             if (criteria.hasOwner()) {
                 Filter securityFilter = QueryUtils.securityFilter(criteria
                         .getOwner());
@@ -482,17 +477,32 @@ public class QueryImpl implements Query {
         } catch (java.text.ParseException e) {
             throw new SearchException("failed to search " + criteria, e);
         } finally {
-            if (searcher != null) {
-                try {
-                    searcher.close();
-                } catch (CorruptIndexException e) {
-                    LOGGER.error(e);
-                } catch (IOException e) {
-                    LOGGER.error(e);
-                }
-            }
             timer.stop();
         }
+    }
+
+    @Override
+    public void close() {
+        if (searcher != null) {
+            try {
+                searcher.close();
+            } catch (CorruptIndexException e) {
+                LOGGER.error(e);
+            } catch (IOException e) {
+                LOGGER.error(e);
+            }
+        }
+        if (reader != null) {
+            try {
+                reader.close();
+            } catch (CorruptIndexException e) {
+                LOGGER.error(e);
+            } catch (IOException e) {
+                LOGGER.error(e);
+            }
+        }
+        searcher = null;
+        reader = null;
     }
 
     private QueryCriteria toFuzzyCriteria(final QueryCriteria criteria) {

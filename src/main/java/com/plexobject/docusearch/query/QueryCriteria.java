@@ -26,6 +26,8 @@ public class QueryCriteria {
     public static final String RADIUS = "radius";
     public static final String OWNER = "owner";
     public static final String SORT_BY = "sortBy";
+    public static final String ALWAYS = "always";
+
     public static final String ASCENDING_SORT = "ascendingSort";
 
     public static final String FUZZY_SEARCH_FOR_NO_RESULTS = "fuzzySearchForNoResults";
@@ -75,6 +77,10 @@ public class QueryCriteria {
 
     public String getIndexStartDateRange() {
         return options.get(INDEX_DATE_BEGIN);
+    }
+
+    public boolean isAlways() {
+        return getBoolean(ALWAYS);
     }
 
     public String getIndexEndDateRange() {
@@ -179,6 +185,11 @@ public class QueryCriteria {
     private double getDouble(final String key) {
         final String value = options.get(key);
         return value == null ? 0 : Double.valueOf(value).doubleValue();
+    }
+
+    private boolean getBoolean(final String key) {
+        final String value = options.get(key);
+        return value == null ? false : Boolean.valueOf(value).booleanValue();
     }
 
     /**

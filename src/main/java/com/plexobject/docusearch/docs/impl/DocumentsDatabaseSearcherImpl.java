@@ -5,11 +5,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
 import org.apache.lucene.store.Directory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.plexobject.docusearch.cache.CacheDisposer;
 import com.plexobject.docusearch.cache.CachedMap;
 import com.plexobject.docusearch.docs.DocumentsDatabaseSearcher;
 import com.plexobject.docusearch.domain.Document;
@@ -30,10 +32,22 @@ import com.sun.jersey.spi.inject.Inject;
 @Component("documentsDatabaseSearcher")
 public class DocumentsDatabaseSearcherImpl implements
         DocumentsDatabaseSearcher, InitializingBean {
+    private static final Logger LOGGER = Logger
+            .getLogger(DocumentsDatabaseSearcherImpl.class);
+
     private static final long INDEFINITE = 0;
 
     private final Map<String, Query> cachedQueries = new CachedMap<String, Query>(
-            INDEFINITE, 24, null);
+            INDEFINITE, 24, null, new CacheDisposer<Query>() {
+                @Override
+                public void dispose(Query q) {
+                    try {
+                        q.close();
+                    } catch (Exception e) {
+                        LOGGER.error("Failed to close " + q, e);
+                    }
+                }
+            });
     @Inject
     @Autowired
     DocumentRepository documentRepository;

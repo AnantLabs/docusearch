@@ -155,6 +155,11 @@ public class CriteriaBuilder implements Builder<QueryCriteria> {
         return this;
     }
 
+    public CriteriaBuilder setAlways() {
+        options.put(QueryCriteria.ALWAYS, String.valueOf(Boolean.TRUE));
+        return this;
+    }
+
     /**
      * @see java.lang.Object#equals(Object)
      */

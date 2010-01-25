@@ -130,3 +130,6 @@ This feature can be tested from HTML interface by clicking on similar link, e.g.
 DocuSearch makes it easy to query documents on CouchDB, however I have also started adding support for Berkley DB if you choose to use it. I found CouchDB wastes a lot of space and is a bit slow so that may be alternative option for some. I also plan to add ngrams and stem based analyzers to create better search experience. I also welcome you to join the project. You can add yourself to http://code.google.com/p/docusearch/ project and start contributing.
 
 
+
+References:
+  - Use mvn depgraph:depgraph to see dependencies

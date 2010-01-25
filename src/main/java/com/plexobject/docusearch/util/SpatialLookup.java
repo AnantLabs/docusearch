@@ -16,14 +16,13 @@ public class SpatialLookup {
     private static final String ZIP_DATABASE = "the_zipcodes";
     private static final long INDEFINITE = 0;
 
-
     private Map<String, double[]> cachedLatLongs = new CachedMap<String, double[]>(
             INDEFINITE, 8192, new CacheLoader<String, double[]>() {
                 @Override
                 public double[] get(String zip) {
                     return fetchLatitudeAndLongitude(zip);
                 }
-            });
+            }, null);
 
     @Autowired
     @Inject

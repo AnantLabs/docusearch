@@ -54,80 +54,90 @@ public class CachedMap<K, V> implements Map<K, V>, CacheFlushable {
 
     final long expiresInSecs;
     private final CacheLoader<K, V> cacheLoader;
+    private final CacheDisposer<V> disposer;
+
     private final Map<K, Pair<Long, V>> map;
     private final Map<Object, ReentrantLock> locks;
 
     public CachedMap() {
-        this(EXPIRES_IN_SECS, MAX_ITEMS, null);
+        this(EXPIRES_IN_SECS, MAX_ITEMS, null, null);
     }
 
     public CachedMap(final long expiresInSecs, final int maxSize) {
-        this(expiresInSecs, maxSize, null);
+        this(expiresInSecs, maxSize, null, null);
     }
 
     public CachedMap(final long expiresInSecs, final int maxSize,
-            final CacheLoader<K, V> cacheLoader) {
+            final CacheLoader<K, V> cacheLoader, final CacheDisposer<V> disposer) {
         this.expiresInSecs = expiresInSecs;
         this.map = Collections
                 .synchronizedMap(new FixedSizeLruLinkedTreeMap<K, Pair<Long, V>>(
                         maxSize / 10, 0.75f, maxSize));
         this.cacheLoader = cacheLoader;
+        this.disposer = disposer;
+
         this.locks = new TreeMap<Object, ReentrantLock>();
         CacheFlusher.getInstance().addCacheFlushable(this);
     }
 
     @Override
-    public int size() {
+    public synchronized int size() {
         return map.size();
     }
 
     @Override
-    public boolean isEmpty() {
+    public synchronized boolean isEmpty() {
         return map.isEmpty();
     }
 
     @Override
-    public boolean containsKey(Object key) {
+    public synchronized boolean containsKey(Object key) {
         return map.containsKey(key);
     }
 
     @Override
-    public boolean containsValue(Object value) {
+    public synchronized boolean containsValue(Object value) {
         return map.containsValue(value);
     }
 
     @Override
-    public V put(K key, V value) {
+    public synchronized V put(K key, V value) {
         Pair<Long, V> previous = map.put(key, new Pair<Long, V>(TimeUtils
                 .getCurrentTimeMillis(), value));
         return previous != null ? previous.getSecond() : null;
     }
 
     @Override
-    public V remove(Object key) {
+    public synchronized V remove(Object key) {
         Pair<Long, V> previous = map.remove(key);
-        return previous != null ? previous.getSecond() : null;
+        V obj = previous != null ? previous.getSecond() : null;
+        if (disposer != null && obj != null) {
+            disposer.dispose(obj);
+        }
+        return obj;
     }
 
     @Override
-    public void putAll(Map<? extends K, ? extends V> m) {
+    public synchronized void putAll(Map<? extends K, ? extends V> m) {
         for (Map.Entry<? extends K, ? extends V> e : m.entrySet()) {
             put(e.getKey(), e.getValue());
         }
     }
 
     @Override
-    public void clear() {
-        map.clear();
+    public synchronized void clear() {
+        for (K key : keySet()) {
+            remove(key);
+        }
     }
 
     @Override
-    public Set<K> keySet() {
+    public synchronized Set<K> keySet() {
         return map.keySet();
     }
 
     @Override
-    public Collection<V> values() {
+    public synchronized Collection<V> values() {
         List<V> list = new ArrayList<V>();
         for (Pair<Long, V> e : map.values()) {
             list.add(e.getSecond());
@@ -136,7 +146,7 @@ public class CachedMap<K, V> implements Map<K, V>, CacheFlushable {
     }
 
     @Override
-    public Set<Map.Entry<K, V>> entrySet() {
+    public synchronized Set<Map.Entry<K, V>> entrySet() {
         Set<Map.Entry<K, V>> set = new HashSet<Map.Entry<K, V>>();
         for (final Map.Entry<K, Pair<Long, V>> e : map.entrySet()) {
             set.add(new Map.Entry<K, V>() {
@@ -163,7 +173,7 @@ public class CachedMap<K, V> implements Map<K, V>, CacheFlushable {
      */
     @SuppressWarnings("unchecked")
     @Override
-    public V get(Object key) {
+    public synchronized V get(Object key) {
         Pair<Long, V> pair = this.map.get(key);
 
         if (pair == null) {
@@ -188,8 +198,8 @@ public class CachedMap<K, V> implements Map<K, V>, CacheFlushable {
         return pair.getSecond();
     }
 
-    private void load(final K key, final boolean synchronizeAccess,
-            final boolean lockAccess) {
+    private synchronized void load(final K key,
+            final boolean synchronizeAccess, final boolean lockAccess) {
         ReentrantLock lock = null;
         try {
             synchronized (this) {
@@ -226,17 +236,17 @@ public class CachedMap<K, V> implements Map<K, V>, CacheFlushable {
     }
 
     @Override
-    public void flushCache() {
+    public synchronized void flushCache() {
         if (expiresInSecs >= 0) {
             if (map.size() > 0 && LOGGER.isInfoEnabled()) {
                 LOGGER.info("*** Flushing " + map.size() + " elements");
             }
-            map.clear();
+            clear();
         }
     }
 
     @Override
-    public int cacheSize() {
+    public synchronized int cacheSize() {
         return map.size();
     }
 
@@ -245,7 +255,7 @@ public class CachedMap<K, V> implements Map<K, V>, CacheFlushable {
      */
     @SuppressWarnings("unchecked")
     @Override
-    public boolean equals(Object object) {
+    public synchronized boolean equals(Object object) {
         if (!(object instanceof CachedMap)) {
             return false;
         }
@@ -257,7 +267,7 @@ public class CachedMap<K, V> implements Map<K, V>, CacheFlushable {
      * @see java.lang.Object#hashCode()
      */
     @Override
-    public int hashCode() {
+    public synchronized int hashCode() {
         return new HashCodeBuilder(786529047, 1924536713).append(this.map)
                 .toHashCode();
     }
