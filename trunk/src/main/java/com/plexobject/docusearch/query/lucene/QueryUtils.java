@@ -444,6 +444,11 @@ public class QueryUtils {
         return false;
     }
 
+    public static Query alwaysQuery() {
+        return new TermQuery(new Term(Constants.ALWAYS_MATCH, String
+                .valueOf(Boolean.TRUE)));
+    }
+
     public static Query orQuery(final String[] keywords,
             final QueryPolicy queryPolicy) {
         if (keywords == null || keywords.length == 0) {
@@ -481,4 +486,5 @@ public class QueryUtils {
         }
         return type;
     }
+
 }

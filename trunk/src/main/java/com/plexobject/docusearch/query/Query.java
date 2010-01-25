@@ -95,4 +95,6 @@ public interface Query {
      * @return top ranking terms
      */
     Collection<RankedTerm> getTopRankingTerms(QueryPolicy policy, int max);
+
+    void close();
 }

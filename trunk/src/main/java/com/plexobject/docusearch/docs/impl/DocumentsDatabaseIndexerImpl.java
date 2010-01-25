@@ -92,7 +92,7 @@ public class DocumentsDatabaseIndexerImpl implements DocumentsDatabaseIndexer,
                 public Indexer get(File dir) {
                     return new IndexerImpl(dir);
                 }
-            });
+            }, null);
 
     public DocumentsDatabaseIndexerImpl() {
     }

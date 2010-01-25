@@ -71,7 +71,7 @@ public final class LuceneUtils {
 
     public static final int COMMIT_MIN = Integer.getInteger(
             "lucene.commit.min", 5000);
-    private static final long INDEFINITE = 0;
+    private static final long INDEFINITE = -1;
 
     private static final Map<File, Directory> cachedFSDirs = new CachedMap<File, Directory>(
             INDEFINITE, 24, new CacheLoader<File, Directory>() {
@@ -80,7 +80,7 @@ public final class LuceneUtils {
                 public Directory get(File dir) {
                     return createFSDirectory(dir);
                 }
-            });
+            }, null);
 
     @SuppressWarnings("unchecked")
     public static final Set<String> STOP_WORDS_SET = new HashSet<String>() {

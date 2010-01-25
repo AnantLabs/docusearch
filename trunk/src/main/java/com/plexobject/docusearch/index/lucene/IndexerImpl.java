@@ -340,7 +340,8 @@ public class IndexerImpl implements Indexer {
                             .getDatabase()
                             + "." + name;
 
-                    final Field.Store store = field.storeInIndex ? Field.Store.YES
+                    final Field.Store store = field.storeInIndex
+                            || field.spatialLatitude || field.spatialLongitude ? Field.Store.YES
                             : Field.Store.NO;
                     final Field.Index index = field.tokenize ? Field.Index.TOKENIZED
                             : field.analyze ? Field.Index.ANALYZED
@@ -377,8 +378,9 @@ public class IndexerImpl implements Indexer {
         //
         if (spatialLatitude != 0 && spatialLongitude != 0) {
             final IProjector projector = new SinusoidalProjector();
-            int startTier = 5; // About 1000 mile bestFit
-            final int endTier = 15; // about 1 mile bestFit
+            // 9 = 100 miles
+            int startTier = 4; // 5; // About 1000 mile bestFit
+            final int endTier = 25; // 15; // about 1 mile bestFit
             for (; startTier <= endTier; startTier++) {
                 CartesianTierPlotter ctp = new CartesianTierPlotter(startTier,
                         projector, Constants.TIER_PREFIX);

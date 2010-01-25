@@ -16,8 +16,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.validator.GenericValidator;
 import org.apache.log4j.Logger;
 import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
-//import org.springframework.stereotype.Component;
+import org.codehaus.jettison.json.JSONObject; //import org.springframework.stereotype.Component;
 
 import com.plexobject.docusearch.Configuration;
 import com.plexobject.docusearch.cache.CachedMap;
@@ -36,7 +35,6 @@ import com.plexobject.docusearch.persistence.PersistenceException;
 public class DocumentRepositoryImpl implements DocumentRepository {
     private static final long INDEFINITE = 0;
 
-
     private static final Logger LOGGER = Logger
             .getLogger(DocumentRepositoryImpl.class);
 
@@ -44,7 +42,7 @@ public class DocumentRepositoryImpl implements DocumentRepository {
             .getProperty("docrepo.dir", "docdep");
 
     final Map<String, Document> cachedDocs = new CachedMap<String, Document>(
-            INDEFINITE, 1024, null);
+            INDEFINITE, 1024, null, null);
 
     private final File dir;
 

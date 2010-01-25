@@ -28,7 +28,6 @@ public class ConfigurationRepositoryImpl implements ConfigurationRepository,
     private static final String INDEX_POLICY = "index_policy_for_";
     private static final long INDEFINITE = 0;
 
-
     private final String database;
     private Map<String, QueryPolicy> cachedQueryPolicies = new CachedMap<String, QueryPolicy>(
             INDEFINITE, 24, new CacheLoader<String, QueryPolicy>() {
@@ -37,7 +36,7 @@ public class ConfigurationRepositoryImpl implements ConfigurationRepository,
                     return fetchQueryPolicy(id);
 
                 }
-            });
+            }, null);
     private Map<String, IndexPolicy> cachedIndexPolicies = new CachedMap<String, IndexPolicy>(
             INDEFINITE, 24, new CacheLoader<String, IndexPolicy>() {
                 @Override
@@ -45,7 +44,7 @@ public class ConfigurationRepositoryImpl implements ConfigurationRepository,
                     return fetchIndexPolicy(id);
 
                 }
-            });
+            }, null);
     private Map<String, LookupPolicy> cachedLookupPolicies = new CachedMap<String, LookupPolicy>(
             INDEFINITE, 24, new CacheLoader<String, LookupPolicy>() {
                 @Override
@@ -53,7 +52,7 @@ public class ConfigurationRepositoryImpl implements ConfigurationRepository,
                     return fetchLookupPolicy(id);
 
                 }
-            });
+            }, null);
 
     @Autowired
     @Inject
@@ -133,7 +132,6 @@ public class ConfigurationRepositoryImpl implements ConfigurationRepository,
                 LookupPolicy.class).convert(doc);
         return policy;
     }
-
 
     @SuppressWarnings("unchecked")
     @Override
@@ -241,7 +239,6 @@ public class ConfigurationRepositoryImpl implements ConfigurationRepository,
     private static String toLookupPolicyId(final String id) {
         return id.startsWith(LOOKUP_POLICY) ? id : LOOKUP_POLICY + id;
     }
-
 
     @Override
     public void afterPropertiesSet() throws Exception {

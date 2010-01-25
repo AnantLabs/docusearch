@@ -14,6 +14,7 @@ import org.codehaus.jettison.json.JSONObject;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.plexobject.docusearch.cache.CacheDisposer;
 import com.plexobject.docusearch.cache.CacheLoader;
 import com.plexobject.docusearch.cache.CachedMap;
 import com.plexobject.docusearch.converter.Converters;
@@ -38,6 +39,15 @@ public class BaseSearchServiceImpl implements InitializingBean {
                 @Override
                 public Query get(File dir) {
                     return newQueryImpl(dir);
+                }
+            }, new CacheDisposer<Query>() {
+                @Override
+                public void dispose(Query q) {
+                    try {
+                        q.close();
+                    } catch (Exception e) {
+                        LOGGER.error("Failed to close " + q, e);
+                    }
                 }
             });
 
