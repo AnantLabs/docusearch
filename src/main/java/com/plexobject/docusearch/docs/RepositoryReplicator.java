@@ -1,5 +1,6 @@
 package com.plexobject.docusearch.docs;
 
+import java.io.File;
 import java.util.Iterator;
 import java.util.List;
 
@@ -12,8 +13,8 @@ import com.plexobject.docusearch.metrics.Timer;
 import com.plexobject.docusearch.persistence.DocumentRepository;
 import com.plexobject.docusearch.persistence.DocumentsIterator;
 import com.plexobject.docusearch.persistence.PersistenceException;
+import com.plexobject.docusearch.persistence.bdb.DocumentRepositoryBdb;
 import com.plexobject.docusearch.persistence.couchdb.DocumentRepositoryCouchdb;
-import com.plexobject.docusearch.persistence.file.DocumentRepositoryImpl;
 
 public class RepositoryReplicator {
     private static final Logger LOGGER = Logger
@@ -52,13 +53,20 @@ public class RepositoryReplicator {
 
     public static void main(String[] args) {
         for (String db : args) {
-            LOGGER.info("Copying " + db);
-            final DocumentRepository srcRepository = new DocumentRepositoryImpl();
-            final DocumentRepository dstRepository = new DocumentRepositoryCouchdb();
+            final DocumentRepository srcRepository = new DocumentRepositoryCouchdb();
+            final DocumentRepositoryBdb dstRepository = new DocumentRepositoryBdb(
+                    new File("search_bdb"));
+            LOGGER.info("Copying " + db + " from " + srcRepository.getInfo(db));
 
             RepositoryReplicator repositoryReplicator = new RepositoryReplicator(
                     srcRepository, dstRepository);
             repositoryReplicator.copy(db);
+            LOGGER.info("Copied " + dstRepository + " "
+                    + dstRepository.count(db) + " records in " + db);
+            try {
+                dstRepository.close();
+            } catch (Exception e) {
+            }
         }
     }
 }
