@@ -231,7 +231,7 @@ public class DocumentRepositoryBdb implements DocumentRepository {
         try {
             PrimaryIndex<String, JsonDocument> primaryIndex = getIndex(dbname);
 
-            cursor = primaryIndex.entities(String.valueOf(startKey), false,
+            cursor = primaryIndex.entities(String.valueOf(startKey), true,
                     null, true);
             Iterator<JsonDocument> it = cursor.iterator();
             for (int i = 0; it.hasNext() && i < limit; i++) {
