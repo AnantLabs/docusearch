@@ -15,6 +15,10 @@ sudo /opt/local/bin/couchdb
 You can verify if CouchDB is running using http://localhost:5984/_utils/index.html.
 
 == Building ==
+Type
+{{{
+    mvn install:install-file -DgroupId=tidy -DartifactId=tidy -Dversion=r938 -Dpackaging=jar lib/jtidy-r938.jar 
+  }}}
 Type "mvn" to build the project. Maven will download a bunch of files that may take a few minutes and will cache those locally and will then proceed to compile, test and build war file.
 
 == Populating Database ==
