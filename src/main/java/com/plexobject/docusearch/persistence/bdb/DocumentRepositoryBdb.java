@@ -590,6 +590,7 @@ public class DocumentRepositoryBdb implements DocumentRepository {
                 store.close();
             } catch (DatabaseException e) {
                 LOGGER.error("Failed to close " + store, e);
+            } catch (IllegalStateException e) {
             }
         }
         for (Database database : databases.values()) {
@@ -597,6 +598,7 @@ public class DocumentRepositoryBdb implements DocumentRepository {
                 database.close();
             } catch (DatabaseException e) {
                 LOGGER.error("Failed to close " + database, e);
+            } catch (IllegalStateException e) {
             }
         }
         try {
