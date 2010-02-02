@@ -583,8 +583,14 @@ public class QueryImpl implements Query {
                 resultBuilder.setScore(score + oldResult.getScore());
                 result = resultBuilder.build();
                 results.set(oldIndex, result);
-                totalHits--;
             }
+        }
+        while (results.size() > pageSize) {
+            results.remove(results.size() - 1);
+        }
+        if (results.size() < pageSize) {
+            int page = start / pageSize;
+            totalHits = (page * pageSize) + results.size();
         }
 
         return new SearchDocList(start, pageSize, totalHits, results,
