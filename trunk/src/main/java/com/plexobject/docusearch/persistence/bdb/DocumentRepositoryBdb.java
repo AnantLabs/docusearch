@@ -42,9 +42,7 @@ import com.sleepycat.persist.PrimaryIndex;
 import com.sleepycat.persist.StoreConfig;
 import com.sleepycat.persist.evolve.IncompatibleClassException;
 
-/**
- * @author Shahzad Bhatti
- */
+
 public class DocumentRepositoryBdb implements DocumentRepository {
     private static final int MAX_MAX_LIMIT = 1024;
 
@@ -52,7 +50,7 @@ public class DocumentRepositoryBdb implements DocumentRepository {
             .getLogger(DocumentRepositoryBdb.class);
     static final int DEFAULT_LIMIT = 256;
     static final String DB_DIR = Configuration.getInstance().getProperty(
-            "search_bdb", "search_bdb");
+            "bdb_docs.dir");
 
     private final File databaseDir;
     private Environment env;
@@ -117,7 +115,8 @@ public class DocumentRepositoryBdb implements DocumentRepository {
      *             is thrown when error occurs while creating the database.
      */
     @Override
-    public boolean createDatabase(String dbname) throws PersistenceException {
+    public synchronized boolean createDatabase(String dbname)
+            throws PersistenceException {
         if (GenericValidator.isBlankOrNull(dbname)) {
             throw new IllegalArgumentException("database name not specified");
         }
@@ -140,7 +139,8 @@ public class DocumentRepositoryBdb implements DocumentRepository {
      *             is thrown when error occurs while deleting the database.
      */
     @Override
-    public boolean deleteDatabase(String dbname) throws PersistenceException {
+    public synchronized boolean deleteDatabase(String dbname)
+            throws PersistenceException {
         if (GenericValidator.isBlankOrNull(dbname)) {
             throw new IllegalArgumentException("database name not specified");
         }
@@ -197,6 +197,9 @@ public class DocumentRepositoryBdb implements DocumentRepository {
             return old != null ? old.getDocument() : document;
         } catch (DatabaseException e) {
             throw new PersistenceException("Failed to save " + document, e);
+        } catch (OutOfMemoryError e) {
+            flushMemory(false);
+            return saveDocument(document, overwrite);
         } finally {
             timer.stop();
         }
@@ -241,6 +244,9 @@ public class DocumentRepositoryBdb implements DocumentRepository {
             return all;
         } catch (DatabaseException e) {
             throw new PersistenceException("Failed to find all in " + dbname, e);
+        } catch (OutOfMemoryError e) {
+            flushMemory(false);
+            return getAllDocuments(dbname, startKey, limit);
         } finally {
             timer.stop();
             if (cursor != null) {
@@ -295,6 +301,9 @@ public class DocumentRepositoryBdb implements DocumentRepository {
         } catch (DatabaseException e) {
             throw new PersistenceException("Failed to get documents from "
                     + dbname + " with range " + startKey + "-" + endKey, e);
+        } catch (OutOfMemoryError e) {
+            flushMemory(false);
+            return getAllDocuments(dbname, startKey, endKey, max);
         } finally {
             timer.stop();
             if (cursor != null) {
@@ -327,6 +336,17 @@ public class DocumentRepositoryBdb implements DocumentRepository {
         if (GenericValidator.isBlankOrNull(id)) {
             throw new IllegalArgumentException("id name not specified");
         }
+        return getDocument(dbname, id, 0);
+    }
+
+    private Document getDocument(final String dbname, final String id, int tries)
+            throws PersistenceException {
+        if (GenericValidator.isBlankOrNull(dbname)) {
+            throw new IllegalArgumentException("database name not specified");
+        }
+        if (GenericValidator.isBlankOrNull(id)) {
+            throw new IllegalArgumentException("id name not specified");
+        }
         final Timer timer = Metric
                 .newTimer("DocumentRepositoryBdb.getDocument");
         try {
@@ -338,8 +358,16 @@ public class DocumentRepositoryBdb implements DocumentRepository {
             }
             return d.getDocument();
         } catch (DatabaseException e) {
-            throw new PersistenceException("Failed to get document with id "
-                    + id, e);
+            flushMemory(true);
+            if (tries < 2) {
+                return getDocument(dbname, id, tries + 1);
+            } else {
+                throw new PersistenceException(
+                        "Failed to get document with id " + id, e);
+            }
+        } catch (OutOfMemoryError e) {
+            flushMemory(false);
+            return getDocument(dbname, id);
         } finally {
             timer.stop();
         }
@@ -389,6 +417,9 @@ public class DocumentRepositoryBdb implements DocumentRepository {
         } catch (DatabaseException e) {
             throw new PersistenceException("Failed to get documents with ids "
                     + ids, e);
+        } catch (OutOfMemoryError e) {
+            flushMemory(false);
+            return getDocuments(dbname, ids);
         } finally {
             timer.stop();
         }
@@ -421,7 +452,7 @@ public class DocumentRepositoryBdb implements DocumentRepository {
     /*
      * (non-Javadoc)
      * 
-     * @see com.plexobject.docusearch.persistence.DocumentRepository#getInfo(java.lang
+     * @see com.peak6.weseed.os.persistence.DocumentRepository#getInfo(java.lang
      * .String)
      */
     @Override
@@ -472,6 +503,9 @@ public class DocumentRepositoryBdb implements DocumentRepository {
             return docsById;
         } catch (DatabaseException e) {
             throw new PersistenceException("Failed to find all in " + dbname, e);
+        } catch (OutOfMemoryError e) {
+            flushMemory(false);
+            return query(dbname, criteria);
         } finally {
             timer.stop();
             if (cursor != null) {
@@ -498,6 +532,8 @@ public class DocumentRepositoryBdb implements DocumentRepository {
         envConfig.setTransactional(false);
         envConfig.setSharedCache(true);
         envConfig.setDurability(defaultDurability);
+        envConfig.setCacheSize(1000000);
+
         // envConfig.setReadOnly(true);
         // envConfig.setTxnTimeout(1000000);
         if (!databaseDir.exists()) {
@@ -530,6 +566,17 @@ public class DocumentRepositoryBdb implements DocumentRepository {
         // writer.optimize();
         // javaCatalog = new StoredClassCatalog(database);
         return true;
+    }
+
+    public synchronized void flushMemory(boolean force) {
+        try {
+            env.evictMemory();
+        } catch (DatabaseException e) {
+        }
+        if (force) {
+            close();
+            open();
+        }
     }
 
     public synchronized boolean close() {
@@ -635,6 +682,10 @@ public class DocumentRepositoryBdb implements DocumentRepository {
                     throw new PersistenceException(e);
                 } catch (DatabaseException e) {
                     throw new PersistenceException(e);
+                } catch (IllegalStateException e) {
+                    stores.remove(dbname);
+                    indexes.remove(dbname);
+                    return getIndex(dbname);
                 }
                 indexes.put(dbname, index);
             }
@@ -649,9 +700,11 @@ public class DocumentRepositoryBdb implements DocumentRepository {
             if (GenericValidator.isBlankOrNull(dbname)) {
                 throw new IllegalArgumentException("dbname is not specified");
             }
-            getDatabase(dbname);
+
             EntityStore store = stores.get(dbname);
             if (store == null) {
+                getDatabase(dbname);
+
                 try {
                     store = new EntityStore(env, dbname, storeConfig);
                 } catch (IncompatibleClassException e) {
@@ -667,7 +720,7 @@ public class DocumentRepositoryBdb implements DocumentRepository {
 
     Database getDatabase(final String dbname) {
         final Timer timer = Metric
-                .newTimer("DocumentRepositoryBdb.deleteDocument");
+                .newTimer("DocumentRepositoryBdb.getDatabase");
         synchronized (dbname.intern()) {
             Database database = databases.get(dbname);
             if (database != null) {
@@ -732,3 +785,4 @@ public class DocumentRepositoryBdb implements DocumentRepository {
     }
 
 }
+
