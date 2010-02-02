@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.plexobject.docusearch.Configuration;
-import com.plexobject.docusearch.cache.CacheLoader;
 import com.plexobject.docusearch.cache.CachedMap;
 import com.plexobject.docusearch.converter.Converters;
 import com.plexobject.docusearch.domain.Document;
@@ -30,29 +29,11 @@ public class ConfigurationRepositoryImpl implements ConfigurationRepository,
 
     private final String database;
     private Map<String, QueryPolicy> cachedQueryPolicies = new CachedMap<String, QueryPolicy>(
-            INDEFINITE, 24, new CacheLoader<String, QueryPolicy>() {
-                @Override
-                public QueryPolicy get(String id) {
-                    return fetchQueryPolicy(id);
-
-                }
-            }, null);
+            INDEFINITE, 24, null, null);
     private Map<String, IndexPolicy> cachedIndexPolicies = new CachedMap<String, IndexPolicy>(
-            INDEFINITE, 24, new CacheLoader<String, IndexPolicy>() {
-                @Override
-                public IndexPolicy get(String id) {
-                    return fetchIndexPolicy(id);
-
-                }
-            }, null);
+            INDEFINITE, 24, null, null);
     private Map<String, LookupPolicy> cachedLookupPolicies = new CachedMap<String, LookupPolicy>(
-            INDEFINITE, 24, new CacheLoader<String, LookupPolicy>() {
-                @Override
-                public LookupPolicy get(String id) {
-                    return fetchLookupPolicy(id);
-
-                }
-            }, null);
+            INDEFINITE, 24, null, null);
 
     @Autowired
     @Inject
